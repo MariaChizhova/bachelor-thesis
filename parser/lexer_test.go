@@ -1,6 +1,8 @@
-package main
+package parser
 
-import "testing"
+import (
+	"testing"
+)
 
 type lexTest struct {
 	input  string
