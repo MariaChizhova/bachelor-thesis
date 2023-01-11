@@ -12,7 +12,7 @@ type Parser struct {
 func (parser *Parser) parsePrimaryExpression() ast.Node {
 	token := parser.currToken
 	switch token.tokenType {
-	case number:
+	case itemNumber:
 		return ast.NumberNode{Value: token.val}
 	default:
 		return nil

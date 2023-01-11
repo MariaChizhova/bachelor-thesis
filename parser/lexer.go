@@ -9,17 +9,21 @@ import (
 var digits = "0123456789"
 
 const (
-	tokenType TokenName = iota
-	number
-	eof = -1
+	itemNumber TokenType = iota
+	itemOperator
+	itemBracket
+	itemIdentifier
+	itemBool
+	itemString
+	itemEOF = -1
 )
 
-type TokenName int
+type TokenType int
 
 type stateFn func(*Lexer) stateFn
 
 type Token struct {
-	tokenType TokenName
+	tokenType TokenType
 	val       string
 	pos       int
 }
@@ -36,7 +40,7 @@ func (lexer *Lexer) word() string {
 	return lexer.input[lexer.start:lexer.pos]
 }
 
-func (lexer *Lexer) emitValue(t TokenName, value string) {
+func (lexer *Lexer) emitValue(t TokenType, value string) {
 	lexer.tokens = append(lexer.tokens, Token{
 		tokenType: t,
 		val:       value,
@@ -45,7 +49,7 @@ func (lexer *Lexer) emitValue(t TokenName, value string) {
 	lexer.start = lexer.pos
 }
 
-func (lexer *Lexer) emit(tokenType TokenName) {
+func (lexer *Lexer) emit(tokenType TokenType) {
 	lexer.emitValue(tokenType, lexer.word())
 }
 
@@ -56,7 +60,7 @@ func (lexer *Lexer) backup() {
 func (lexer *Lexer) next() rune {
 	if lexer.pos >= len(lexer.input) {
 		lexer.width = 0
-		return eof
+		return itemEOF
 	}
 	r, w := utf8.DecodeRuneInString(lexer.input[lexer.pos:])
 	lexer.width = w
@@ -124,7 +128,7 @@ func lexNumber(lexer *Lexer) stateFn {
 	if !lexer.scanNumber() {
 		return nil
 	}
-	lexer.emit(number)
+	lexer.emit(itemNumber)
 	return scan
 }
 
@@ -137,13 +141,36 @@ func lexDot(lexer *Lexer) stateFn {
 	return scan
 }
 
+func lexIdentifier(lexer *Lexer) stateFn {
+loop:
+	for {
+		switch r := lexer.next(); {
+		case isAlphaNumeric(r):
+			// absorb
+		default:
+			lexer.backup()
+			switch lexer.word() {
+			case "or", "and":
+				lexer.emit(itemOperator)
+			case "true", "false":
+				lexer.emit(itemBool)
+			default:
+				lexer.emit(itemIdentifier)
+			}
+			break loop
+		}
+	}
+	return scan
+}
+
 func scan(lexer *Lexer) stateFn {
 	switch r := lexer.next(); {
+	// TODO: add string processing
 	case isNonToken(r):
 		lexer.skip()
 		return scan
-	case r == eof:
-		lexer.emit(eof)
+	case r == itemEOF:
+		lexer.emit(itemEOF)
 		return nil
 	case '0' <= r && r <= '9':
 		lexer.backup()
@@ -151,9 +178,19 @@ func scan(lexer *Lexer) stateFn {
 	case r == '.':
 		lexer.backup()
 		return lexDot
+	case strings.ContainsRune("([{", r):
+		lexer.emit(itemBracket)
+	case strings.ContainsRune(")]}", r):
+		lexer.emit(itemBracket)
+	case strings.ContainsRune("+-/%=><&|", r):
+		lexer.emit(itemOperator)
+	case isAlphaNumeric(r):
+		lexer.backup()
+		return lexIdentifier
 	default:
 		return nil
 	}
+	return scan
 }
 
 func lex(input string) []Token {
