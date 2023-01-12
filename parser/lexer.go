@@ -15,6 +15,7 @@ const (
 	itemIdentifier
 	itemBool
 	itemString
+	itemNil
 	itemEOF = -1
 )
 
@@ -165,6 +166,8 @@ loop:
 				lexer.emit(itemOperator)
 			case "true", "false":
 				lexer.emit(itemBool)
+			case "nil":
+				lexer.emit(itemNil)
 			default:
 				lexer.emit(itemIdentifier)
 			}

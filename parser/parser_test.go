@@ -15,7 +15,45 @@ type parseTest struct {
 var parseTests = []parseTest{
 	{
 		"1",
-		ast.NumberNode{Value: fmt.Sprint(1)},
+		&ast.NumberNode{Value: fmt.Sprint(1), Int64: 1, IsInt: true, IsFloat: false, NodeType: ast.NodeNumber},
+	},
+	{
+		"1.2",
+		&ast.NumberNode{Value: fmt.Sprint(1.2), Float64: 1.2, IsFloat: true, IsInt: false, NodeType: ast.NodeNumber},
+	},
+	{
+		"true",
+		&ast.BoolNode{Value: true, NodeType: ast.NodeBool},
+	},
+	{
+		"nil",
+		&ast.NilNode{NodeType: ast.NodeNil},
+	},
+	{
+		`"abc"`,
+		&ast.StringNode{Value: "abc", NodeType: ast.NodeString},
+	},
+	{
+		`var`,
+		&ast.IdentifierNode{Value: "var", NodeType: ast.NodeIdentifier},
+	},
+	{
+		`+1`,
+		&ast.UnaryNode{Operator: "+", Node: &ast.NumberNode{Value: "1", Int64: 1, IsInt: true, IsFloat: false, NodeType: ast.NodeNumber}},
+	},
+	{
+		`a + b`,
+		&ast.BinaryNode{Operator: "+",
+			Left:  &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+			Right: &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+	},
+	{
+		"a and b or c",
+		&ast.BinaryNode{Operator: "and",
+			Left: &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+			Right: &ast.BinaryNode{Operator: "or",
+				Left:  &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier},
+				Right: &ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier}}},
 	},
 }
 

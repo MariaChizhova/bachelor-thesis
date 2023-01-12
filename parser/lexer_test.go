@@ -80,9 +80,10 @@ var lexTests = []lexTest{
 		},
 	},
 	{
-		`'abc'`,
+		`'abc' nil`,
 		[]Token{
 			{tokenType: itemString, val: "abc"},
+			{tokenType: itemNil, val: "nil"},
 			{tokenType: itemEOF},
 		},
 	},
