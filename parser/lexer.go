@@ -108,6 +108,17 @@ func (lexer *Lexer) skip() {
 	lexer.start = lexer.pos
 }
 
+func (lexer *Lexer) scanString(r rune) {
+	ch := lexer.next()
+	for ch != r {
+		if ch == '\n' || ch == itemEOF {
+			return
+		}
+		ch = lexer.next()
+	}
+	return
+}
+
 func (lexer *Lexer) scanNumber() bool {
 	lexer.acceptRun(digits)
 	if lexer.accept(".") {
@@ -165,7 +176,6 @@ loop:
 
 func scan(lexer *Lexer) stateFn {
 	switch r := lexer.next(); {
-	// TODO: add string processing
 	case isNonToken(r):
 		lexer.skip()
 		return scan
@@ -187,6 +197,10 @@ func scan(lexer *Lexer) stateFn {
 	case isAlphaNumeric(r):
 		lexer.backup()
 		return lexIdentifier
+	case r == '\'' || r == '"':
+		lexer.scanString(r)
+		str := lexer.word()
+		lexer.emitValue(itemString, str[1:len(str)-1])
 	default:
 		return nil
 	}
