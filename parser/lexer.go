@@ -195,7 +195,11 @@ func scan(lexer *Lexer) stateFn {
 		lexer.emit(itemBracket)
 	case strings.ContainsRune(")]}", r):
 		lexer.emit(itemBracket)
-	case strings.ContainsRune("+-/%=><&|", r):
+	case strings.ContainsRune("+-/%*^=><!&|,", r):
+		// to parse >=, <=, ==, != operators
+		if !strings.ContainsRune("=", lexer.next()) {
+			lexer.backup()
+		}
 		lexer.emit(itemOperator)
 	case isAlphaNumeric(r):
 		lexer.backup()

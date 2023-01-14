@@ -2,6 +2,7 @@ package parser
 
 import (
 	ast "bachelor-thesis/parser/ast"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -21,13 +22,18 @@ var unaryOperators = map[string]bool{
 var binaryOperators = map[string]bool{
 	"or":  true,
 	"and": true,
-	"<":   true,
-	">":   true,
 	"+":   true,
 	"-":   true,
 	"*":   true,
 	"/":   true,
 	"%":   true,
+	"^":   true,
+	"<":   true,
+	"<=":  true,
+	">":   true,
+	">=":  true,
+	"==":  true,
+	"!=":  true,
 }
 
 func (parser *Parser) next() {
@@ -57,9 +63,13 @@ func (parser *Parser) parsePrimaryExpression() ast.Node {
 	case itemString:
 		return &ast.StringNode{Value: token.val, NodeType: ast.NodeString}
 	case itemIdentifier:
+		if parser.currToken.val == "(" {
+			return parser.parseFunctionCall(token)
+		}
 		return &ast.IdentifierNode{Value: token.val, NodeType: ast.NodeIdentifier}
 	default:
-		return nil
+		var node ast.Node
+		return node
 	}
 }
 
@@ -91,16 +101,50 @@ func (parser *Parser) parsePrimary() ast.Node {
 func (parser *Parser) parseExpression() ast.Node {
 	left := parser.parsePrimary()
 	token := parser.currToken
-	if binaryOperators[token.val] {
-		parser.next()
-		right := parser.parseExpression()
-		left = &ast.BinaryNode{
-			Operator: token.val,
-			Left:     left,
-			Right:    right,
+	if token.tokenType == itemOperator {
+		if binaryOperators[token.val] {
+			parser.next()
+			right := parser.parseExpression()
+			left = &ast.BinaryNode{
+				Operator: token.val,
+				Left:     left,
+				Right:    right,
+			}
 		}
 	}
 	return left
+}
+
+func (parser *Parser) parseFunctionCall(token Token) ast.Node {
+	arguments := make([]ast.Node, 0)
+	for parser.currToken.val != ")" {
+		if len(arguments) > 0 {
+			if parser.currToken.val == "," {
+				parser.next()
+			} else {
+				// TODO: expect ","
+				break
+			}
+		} else {
+			parser.next()
+		}
+		node := parser.parseExpression()
+		if node != nil && !reflect.ValueOf(node).IsNil() {
+			arguments = append(arguments, node)
+		} else {
+			break
+		}
+	}
+	if parser.currToken.val == ")" {
+		parser.next()
+	} else {
+		// TODO: expect ")"
+	}
+	return &ast.FunctionNode{
+		Function:  &ast.IdentifierNode{Value: token.val, NodeType: ast.NodeIdentifier},
+		Arguments: arguments,
+		NodeType:  ast.NodeFunction,
+	}
 }
 
 func Parse(input string) ast.Node {

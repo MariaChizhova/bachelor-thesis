@@ -79,6 +79,12 @@ func (node *BinaryNode) Type() NodeType {
 	return NodeBinary
 }
 
+type FunctionNode struct {
+	NodeType
+	Function  Node
+	Arguments []Node
+}
+
 const (
 	NodeNumber NodeType = iota
 	NodeIdentifier
@@ -87,4 +93,5 @@ const (
 	NodeNil
 	NodeUnary
 	NodeBinary
+	NodeFunction
 )

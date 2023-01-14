@@ -55,6 +55,63 @@ var parseTests = []parseTest{
 				Left:  &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier},
 				Right: &ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier}}},
 	},
+	{
+		"(a + b)",
+		&ast.BinaryNode{Operator: "+",
+			Left:  &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+			Right: &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+	},
+	{
+		"(a + b) * c",
+		&ast.BinaryNode{Operator: "*",
+			Left: &ast.BinaryNode{Operator: "+",
+				Left:  &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+				Right: &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+			Right: &ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier}},
+	},
+	{
+		"(a != b) and (c >= b)",
+		&ast.BinaryNode{
+			Operator: "and",
+			Left: &ast.BinaryNode{Operator: "!=",
+				Left:  &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+				Right: &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+			Right: &ast.BinaryNode{Operator: ">=",
+				Left:  &ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier},
+				Right: &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+		},
+	},
+	{
+		"foo()",
+		&ast.FunctionNode{Function: &ast.IdentifierNode{Value: "foo", NodeType: ast.NodeIdentifier},
+			Arguments: []ast.Node{},
+			NodeType:  ast.NodeFunction,
+		},
+	},
+	{
+		"foo(a)",
+		&ast.FunctionNode{Function: &ast.IdentifierNode{Value: "foo", NodeType: ast.NodeIdentifier},
+			Arguments: []ast.Node{&ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier}},
+			NodeType:  ast.NodeFunction,
+		},
+	},
+	{
+		"foo(a, b)",
+		&ast.FunctionNode{Function: &ast.IdentifierNode{Value: "foo", NodeType: ast.NodeIdentifier},
+			Arguments: []ast.Node{&ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+				&ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+			NodeType: ast.NodeFunction,
+		},
+	},
+	{
+		"foo(baz())",
+		&ast.FunctionNode{Function: &ast.IdentifierNode{Value: "foo", NodeType: ast.NodeIdentifier},
+			Arguments: []ast.Node{&ast.FunctionNode{Function: &ast.IdentifierNode{Value: "baz", NodeType: ast.NodeIdentifier},
+				Arguments: []ast.Node{},
+				NodeType:  ast.NodeFunction}},
+			NodeType: ast.NodeFunction,
+		},
+	},
 }
 
 func TestParse(t *testing.T) {
