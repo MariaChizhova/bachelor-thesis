@@ -2,6 +2,7 @@ package parser
 
 import (
 	ast "bachelor-thesis/parser/ast"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -90,7 +91,7 @@ func (parser *Parser) parsePrimary() ast.Node {
 			if parser.currToken.val == ")" {
 				parser.next()
 			} else {
-				// TODO: error: ")" is expected
+				parser.errorf("')' is expected")
 			}
 			return expr
 		}
@@ -122,7 +123,7 @@ func (parser *Parser) parseFunctionCall(token Token) ast.Node {
 			if parser.currToken.val == "," {
 				parser.next()
 			} else {
-				// TODO: expect ","
+				parser.errorf("',' is expected")
 				break
 			}
 		} else {
@@ -138,7 +139,7 @@ func (parser *Parser) parseFunctionCall(token Token) ast.Node {
 	if parser.currToken.val == ")" {
 		parser.next()
 	} else {
-		// TODO: expect ")"
+		parser.errorf("')' is expected")
 	}
 	return &ast.FunctionNode{
 		Function:  &ast.IdentifierNode{Value: token.val, NodeType: ast.NodeIdentifier},
@@ -158,4 +159,9 @@ func Parse(input string) ast.Node {
 
 	node := parser.parseExpression()
 	return node
+}
+
+func (parser *Parser) errorf(format string, args ...any) {
+	format = fmt.Sprintf("Parse error: %s", format)
+	panic(fmt.Errorf(format, args...))
 }
