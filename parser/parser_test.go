@@ -112,6 +112,33 @@ var parseTests = []parseTest{
 			NodeType: ast.NodeFunction,
 		},
 	},
+	{
+		"[]",
+		&ast.ArrayNode{
+			Nodes:    []ast.Node{},
+			NodeType: ast.NodeArray,
+		},
+	},
+	{
+		"[a, b]",
+		&ast.ArrayNode{
+			Nodes: []ast.Node{&ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+				&ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+			NodeType: ast.NodeArray,
+		},
+	},
+	{
+		"[a, [b, c]]",
+		&ast.ArrayNode{
+			Nodes: []ast.Node{&ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+				&ast.ArrayNode{
+					Nodes: []ast.Node{&ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier},
+						&ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier}},
+					NodeType: ast.NodeArray,
+				}},
+			NodeType: ast.NodeArray,
+		},
+	},
 }
 
 func TestParse(t *testing.T) {

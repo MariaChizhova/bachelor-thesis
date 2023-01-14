@@ -94,6 +94,8 @@ func (parser *Parser) parsePrimary() ast.Node {
 				parser.errorf("')' is expected")
 			}
 			return expr
+		} else if token.val == "[" {
+			return parser.parseArray()
 		}
 	}
 	return parser.parsePrimaryExpression()
@@ -123,7 +125,6 @@ func (parser *Parser) parseFunctionCall(token Token) ast.Node {
 			if parser.currToken.val == "," {
 				parser.next()
 			} else {
-				parser.errorf("',' is expected")
 				break
 			}
 		} else {
@@ -138,13 +139,40 @@ func (parser *Parser) parseFunctionCall(token Token) ast.Node {
 	}
 	if parser.currToken.val == ")" {
 		parser.next()
-	} else {
-		parser.errorf("')' is expected")
 	}
 	return &ast.FunctionNode{
 		Function:  &ast.IdentifierNode{Value: token.val, NodeType: ast.NodeIdentifier},
 		Arguments: arguments,
 		NodeType:  ast.NodeFunction,
+	}
+}
+
+func (parser *Parser) parseArray() ast.Node {
+	nodes := make([]ast.Node, 0)
+	for parser.currToken.val != "]" {
+		if len(nodes) > 0 {
+			if parser.currToken.val == "," {
+				parser.next()
+			} else {
+				parser.errorf("',' or ']` are expected")
+				break
+			}
+		} else {
+			parser.next()
+		}
+		node := parser.parseExpression()
+		if node != nil && !reflect.ValueOf(node).IsNil() {
+			nodes = append(nodes, node)
+		} else {
+			break
+		}
+	}
+	if parser.currToken.val == "]" {
+		parser.next()
+	}
+	return &ast.ArrayNode{
+		Nodes:    nodes,
+		NodeType: ast.NodeArray,
 	}
 }
 

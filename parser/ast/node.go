@@ -85,6 +85,11 @@ type FunctionNode struct {
 	Arguments []Node
 }
 
+type ArrayNode struct {
+	NodeType
+	Nodes []Node
+}
+
 const (
 	NodeNumber NodeType = iota
 	NodeIdentifier
@@ -94,4 +99,5 @@ const (
 	NodeUnary
 	NodeBinary
 	NodeFunction
+	NodeArray
 )
