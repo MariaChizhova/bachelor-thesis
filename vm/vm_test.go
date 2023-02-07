@@ -16,6 +16,7 @@ type vmTest struct {
 var vmTests = []vmTest{
 	{"true", true},
 	{"false", false},
+	{"nil", nil},
 	{"1", int64(1)},
 	{"-1", int64(-1)},
 	{"2.4", 2.4},
@@ -25,6 +26,15 @@ var vmTests = []vmTest{
 	{"4 / 2", 2},
 	{"2 ^ 2", 4},
 	{"5 % 2", 1},
+	{"1 < 2", true},
+	{"2 <= 2", true},
+	{"1 > 0.2", true},
+	{"1 >= 2", false},
+	{"1 == 2", false},
+	{"1 != 2", true},
+	{"(1.1 + 2.1) * 4.1", 13.12},
+	{"(1.2 + 3) < 4", false}, // TODO: check why it fails without brackets
+	// {"(1 + 2) * 4", 12} // TODO: fails with example (1 + 2) * 4, because int64 * int is not implemented
 }
 
 // TODO: change the location of this function
@@ -62,6 +72,8 @@ func testExpectedObject(
 	case int64:
 		assert.Equal(t, expected, actual)
 	case float64:
+		assert.Equal(t, expected, actual)
+	case nil:
 		assert.Equal(t, expected, actual)
 	}
 }
