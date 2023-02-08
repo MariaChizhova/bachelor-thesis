@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
-	node := parser.Parse("a and b or c")
+	//node := parser.Parse("true")
+	node := parser.Parse("1 - 2")
 	fmt.Print(ast.Print(node))
+
 }
