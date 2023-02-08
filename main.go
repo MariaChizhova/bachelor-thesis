@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"bachelor-thesis/parser"
+	"bachelor-thesis/parser/ast"
+	"fmt"
+)
 
 func main() {
-	fmt.Println("Hello world!")
+	//node := parser.Parse("true")
+	node := parser.Parse("1 - 2")
+	fmt.Print(ast.Print(node))
+
 }
