@@ -22,26 +22,25 @@ var compilerTests = []compilerTest{
 		},
 	},
 	{
+		`false`,
+		Program{
+			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpFalse)}),
+		},
+	},
+	{
 		`nil`,
 		Program{
 			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpNil)}),
 		},
 	},
 	{
-		`true + false`,
+		`10`,
 		Program{
-			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpTrue),
-				code.Make(code.OpFalse),
-				code.Make(code.OpAdd),
-				/*code.Make(code.OpPop)*/}),
-		},
-	},
-	{
-		`true < false`,
-		Program{
-			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpTrue),
-				code.Make(code.OpFalse),
-				code.Make(code.OpLessThan),
+			Constants: []interface{}{
+				int64(10),
+			},
+			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpConstant),
 				/*code.Make(code.OpPop)*/}),
 		},
 	},
@@ -58,15 +57,13 @@ var compilerTests = []compilerTest{
 		},
 	},
 	{
-		`1 - 2`,
+		`1.2`,
 		Program{
 			Constants: []interface{}{
-				int64(1), int64(2),
+				1.2,
 			},
 			Instructions: concatInstructions([]code.Instructions{
-				code.Make(code.OpConstant, 0),
-				code.Make(code.OpConstant, 1),
-				code.Make(code.OpSub),
+				code.Make(code.OpConstant),
 				/*code.Make(code.OpPop)*/}),
 		},
 	},
@@ -79,22 +76,51 @@ var compilerTests = []compilerTest{
 			Instructions: code.Make(code.OpConstant),
 		},
 	},
-}
-
-// TODO: change the location of this function
-func CompileMain(input string) (*Program, error) {
-	tree := parser.Parse(input)
-	program, err := Compile(tree)
-	if err != nil {
-		return nil, err
-	}
-	return program, nil
+	{
+		`1 == 3`,
+		Program{
+			Constants: []interface{}{
+				int64(1), int64(3),
+			},
+			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpEqual),
+				/*code.Make(code.OpPop)*/}),
+		},
+	},
+	{
+		`1 < 2`,
+		Program{
+			Constants: []interface{}{
+				int64(1), int64(2),
+			},
+			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpLessThan),
+				/*code.Make(code.OpPop)*/}),
+		},
+	},
+	{
+		`1 + 2`,
+		Program{
+			Constants: []interface{}{
+				int64(1), int64(2),
+			},
+			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpAdd),
+				/*code.Make(code.OpPop)*/}),
+		},
+	},
 }
 
 func TestCompiler(t *testing.T) {
 	for _, test := range compilerTests {
-		program, err := CompileMain(test.input)
+		tree := parser.Parse(test.input)
+		program, err := Compile(tree)
 		require.NoError(t, err, test.input)
+		// print(program.Instructions.String())
 		assert.Equal(t, test.program.Instructions, program.Instructions)
 		assert.Equal(t, test.program.Constants, program.Constants)
 	}

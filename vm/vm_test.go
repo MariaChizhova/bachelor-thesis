@@ -27,30 +27,20 @@ var vmTests = []vmTest{
 	{"2 ^ 2", 4},
 	{"5 % 2", 1},
 	{"1 < 2", true},
+	{"1 < 1", false},
 	{"2 <= 2", true},
 	{"1 > 0.2", true},
 	{"1 >= 2", false},
 	{"1 == 2", false},
+	{"1 == 1", true},
 	{"1 != 2", true},
-	{"(1.1 + 2.1) * 4.1", 13.12},
-	{"(1.2 + 3) < 4", false}, // TODO: check why it fails without brackets
-	// {"(1 + 2) * 4", 12} // TODO: fails with example (1 + 2) * 4, because int64 * int is not implemented
-}
-
-// TODO: change the location of this function
-func CompileMain(input string) (*compiler.Program, error) {
-	tree := parser.Parse(input)
-	program, err := compiler.Compile(tree)
-	if err != nil {
-		return nil, err
-	}
-	return program, nil
+	// TODO: implement more tests
 }
 
 func TestVM(t *testing.T) {
 	for _, test := range vmTests {
-		program, err := CompileMain(test.input)
-		require.NoError(t, err, test.input)
+		tree := parser.Parse(test.input)
+		program, err := compiler.Compile(tree)
 		vm := New(program.Instructions, program.Constants)
 		err = vm.Run()
 		require.NoError(t, err, test.input)

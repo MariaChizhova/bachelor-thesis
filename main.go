@@ -8,7 +8,7 @@ import (
 
 func main() {
 	//node := parser.Parse("true")
-	node := parser.Parse("1 - 2")
+	node := parser.Parse("1 * 2 + 3")
 	fmt.Print(ast.Print(node))
 
 }
