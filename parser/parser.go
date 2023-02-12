@@ -1,7 +1,7 @@
 package parser
 
 import (
-	ast "bachelor-thesis/parser/ast"
+	"bachelor-thesis/parser/ast"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -15,26 +15,26 @@ type Parser struct {
 	pos       int
 }
 
-var unaryOperators = map[string]bool{
-	"-": true,
-	"+": true,
+var unaryOperators = map[string]int{
+	"-": 6,
+	"+": 6,
 }
 
-var binaryOperators = map[string]bool{
-	"or":  true,
-	"and": true,
-	"+":   true,
-	"-":   true,
-	"*":   true,
-	"/":   true,
-	"%":   true,
-	"^":   true,
-	"<":   true,
-	"<=":  true,
-	">":   true,
-	">=":  true,
-	"==":  true,
-	"!=":  true,
+var binaryOperators = map[string]int{
+	"and": 1,
+	"or":  2,
+	"<":   3,
+	"<=":  3,
+	">":   3,
+	">=":  3,
+	"==":  3,
+	"!=":  3,
+	"+":   4,
+	"-":   4,
+	"*":   5,
+	"/":   5,
+	"%":   5,
+	"^":   5,
 }
 
 func (parser *Parser) next() {
@@ -78,16 +78,16 @@ func (parser *Parser) parsePrimary() ast.Node {
 	token := parser.currToken
 	switch token.tokenType {
 	case itemOperator:
-		if unaryOperators[token.val] {
+		if unaryOperators[token.val] != 0 {
 			parser.next()
-			expr := parser.parseExpression()
+			expr := parser.parseExpression(unaryOperators[token.val])
 			node := &ast.UnaryNode{Operator: token.val, Node: expr}
 			return node
 		}
 	case itemBracket:
 		if token.val == "(" {
 			parser.next()
-			expr := parser.parseExpression()
+			expr := parser.parseExpression(unaryOperators[token.val])
 			if parser.currToken.val == ")" {
 				parser.next()
 			} else {
@@ -101,19 +101,24 @@ func (parser *Parser) parsePrimary() ast.Node {
 	return parser.parsePrimaryExpression()
 }
 
-func (parser *Parser) parseExpression() ast.Node {
+func (parser *Parser) parseExpression(precedence int) ast.Node {
 	left := parser.parsePrimary()
 	token := parser.currToken
-	if token.tokenType == itemOperator {
-		if binaryOperators[token.val] {
-			parser.next()
-			right := parser.parseExpression()
-			left = &ast.BinaryNode{
-				Operator: token.val,
-				Left:     left,
-				Right:    right,
+	for token.tokenType == itemOperator {
+		if token.tokenType == itemOperator {
+			if binaryOperators[token.val] > precedence {
+				parser.next()
+				right := parser.parseExpression(binaryOperators[token.val])
+				left = &ast.BinaryNode{
+					Operator: token.val,
+					Left:     left,
+					Right:    right,
+				}
+				token = parser.currToken
+				continue
 			}
 		}
+		break
 	}
 	return left
 }
@@ -130,7 +135,7 @@ func (parser *Parser) parseFunctionCall(token Token) ast.Node {
 		} else {
 			parser.next()
 		}
-		node := parser.parseExpression()
+		node := parser.parseExpression(0)
 		if node != nil && !reflect.ValueOf(node).IsNil() {
 			arguments = append(arguments, node)
 		} else {
@@ -160,7 +165,7 @@ func (parser *Parser) parseArray() ast.Node {
 		} else {
 			parser.next()
 		}
-		node := parser.parseExpression()
+		node := parser.parseExpression(0)
 		if node != nil && !reflect.ValueOf(node).IsNil() {
 			nodes = append(nodes, node)
 		} else {
@@ -185,7 +190,7 @@ func Parse(input string) ast.Node {
 		currToken: tokens[0],
 	}
 
-	node := parser.parseExpression()
+	node := parser.parseExpression(0)
 	return node
 }
 

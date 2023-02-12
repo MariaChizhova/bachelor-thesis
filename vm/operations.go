@@ -7,6 +7,8 @@ import (
 )
 
 // TODO: check and change these functions
+// TODO: check when it's int64 and when it's int
+
 func (vm *VM) executeAddOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
 	case int:
@@ -37,13 +39,24 @@ func (vm *VM) executeAddOperation(a, b interface{}) interface{} {
 			return x + y
 		}
 	}
-	panic(fmt.Sprintf("invalid operation: %T * %T", a, b))
+	panic(fmt.Sprintf("invalid operation: %T + %T", a, b))
 }
 
 func (vm *VM) executeSubtractOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
+	case int:
+		switch y := b.(type) {
+		case int:
+			return x - y
+		case int64:
+			return x - int(y)
+		case float64:
+			return float64(x) - y
+		}
 	case int64:
 		switch y := b.(type) {
+		case int:
+			return int(x) - y
 		case int64:
 			return int(x) - int(y)
 		case float64:
@@ -51,14 +64,17 @@ func (vm *VM) executeSubtractOperation(a, b interface{}) interface{} {
 		}
 	case float64:
 		switch y := b.(type) {
+		case int:
+			return x - float64(y)
 		case int64:
-			return int(x) - int(y)
+			return x - float64(y)
 		case float64:
 			return x - y
 		}
 	}
-	panic(fmt.Sprintf("invalid operation: %T * %T", a, b))
+	panic(fmt.Sprintf("invalid operation: %T - %T", a, b))
 }
+
 func (vm *VM) executeMultiplyOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
 	case int:
@@ -66,7 +82,7 @@ func (vm *VM) executeMultiplyOperation(a, b interface{}) interface{} {
 		case int:
 			return x * y
 		case int64:
-			return x * int(y)
+			return int64(x) * y
 		case float64:
 			return float64(x) * y
 		}
@@ -93,8 +109,19 @@ func (vm *VM) executeMultiplyOperation(a, b interface{}) interface{} {
 }
 func (vm *VM) executeDivideOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
+	case int:
+		switch y := b.(type) {
+		case int:
+			return x / y
+		case int64:
+			return int64(x) / y
+		case float64:
+			return float64(x) / y
+		}
 	case int64:
 		switch y := b.(type) {
+		case int:
+			return x / int64(y)
 		case int64:
 			return int(x) / int(y)
 		case float64:
@@ -102,23 +129,34 @@ func (vm *VM) executeDivideOperation(a, b interface{}) interface{} {
 		}
 	case float64:
 		switch y := b.(type) {
+		case int:
+			return x / float64(y)
 		case int64:
-			return int(x) / int(y)
+			return x / float64(y)
 		case float64:
 			return x / y
 		}
 	}
-	panic(fmt.Sprintf("invalid operation: %T * %T", a, b))
+	panic(fmt.Sprintf("invalid operation: %T / %T", a, b))
 }
 func (vm *VM) executeRemainderOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
+	case int:
+		switch y := b.(type) {
+		case int:
+			return x % y
+		case int64:
+			return int64(x) % y
+		}
 	case int64:
 		switch y := b.(type) {
+		case int:
+			return x % int64(y)
 		case int64:
-			return int(x) % int(y)
+			return x % y
 		}
 	}
-	panic(fmt.Sprintf("invalid operation: %T * %T", a, b))
+	panic(fmt.Sprintf("invalid operation: %T mod %T", a, b))
 }
 func (vm *VM) executeExponentiationOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
@@ -137,7 +175,7 @@ func (vm *VM) executeExponentiationOperation(a, b interface{}) interface{} {
 			return math.Pow(x, y)
 		}
 	}
-	panic(fmt.Sprintf("invalid operation: %T * %T", a, b))
+	panic(fmt.Sprintf("invalid operation: %T ^ %T", a, b))
 }
 
 func (vm *VM) executeMinusOperator() interface{} {
@@ -228,6 +266,11 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 		}
 	case code.OpEqual:
 		switch y := a.(type) {
+		case bool:
+			switch x := b.(type) {
+			case bool:
+				return x == y
+			}
 		case int64:
 			switch x := b.(type) {
 			case int64:
@@ -245,6 +288,11 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 		}
 	case code.OpNotEqual:
 		switch y := a.(type) {
+		case bool:
+			switch x := b.(type) {
+			case bool:
+				return x != y
+			}
 		case int64:
 			switch x := b.(type) {
 			case int64:

@@ -48,6 +48,22 @@ var parseTests = []parseTest{
 			Right: &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
 	},
 	{
+		`a + b * c`,
+		&ast.BinaryNode{Operator: "+",
+			Left: &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+			Right: &ast.BinaryNode{Operator: "*",
+				Left:  &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier},
+				Right: &ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier}}},
+	},
+	{
+		`a * b + c`,
+		&ast.BinaryNode{Operator: "+",
+			Left: &ast.BinaryNode{Operator: "*",
+				Left:  &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+				Right: &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+			Right: &ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier}},
+	},
+	{
 		"a and b or c",
 		&ast.BinaryNode{Operator: "and",
 			Left: &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},

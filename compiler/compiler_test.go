@@ -113,6 +113,29 @@ var compilerTests = []compilerTest{
 				/*code.Make(code.OpPop)*/}),
 		},
 	},
+	{
+		`1 - 2 + 3 * 4 / 2 ^ 2 % 3`,
+		Program{
+			Constants: []interface{}{
+				int64(1), int64(2), int64(3), int64(4), int64(2), int64(2), int64(3),
+			},
+			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpSub),
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpConstant, 3),
+				code.Make(code.OpMul),
+				code.Make(code.OpConstant, 4),
+				code.Make(code.OpDiv),
+				code.Make(code.OpConstant, 5),
+				code.Make(code.OpExp),
+				code.Make(code.OpConstant, 6),
+				code.Make(code.OpMod),
+				code.Make(code.OpAdd),
+				/* code.Make(code.OpPop)*/}),
+		},
+	},
 }
 
 func TestCompiler(t *testing.T) {
@@ -120,7 +143,6 @@ func TestCompiler(t *testing.T) {
 		tree := parser.Parse(test.input)
 		program, err := Compile(tree)
 		require.NoError(t, err, test.input)
-		// print(program.Instructions.String())
 		assert.Equal(t, test.program.Instructions, program.Instructions)
 		assert.Equal(t, test.program.Constants, program.Constants)
 	}
