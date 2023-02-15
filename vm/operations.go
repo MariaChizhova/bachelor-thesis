@@ -38,6 +38,11 @@ func (vm *VM) executeAddOperation(a, b interface{}) interface{} {
 		case float64:
 			return x + y
 		}
+	case string:
+		switch y := b.(type) {
+		case string:
+			return x + y
+		}
 	}
 	panic(fmt.Sprintf("invalid operation: %T + %T", a, b))
 }

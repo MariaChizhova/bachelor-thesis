@@ -49,6 +49,11 @@ var vmTests = []vmTest{
 	{"true != false", true},
 	{"(1 < 2) == true", true},
 	{"(1 < 2) == false", false},
+	{`"hello"`, "hello"},
+	{`"hello " + "world!"`, "hello world!"},
+	{"[]", []interface{}{}},
+	{"[1, 2, 3.1]", []interface{}{int64(1), int64(2), 3.1}},
+	{"[1 + 2, 2 * 3]", []interface{}{3, 6}},
 	// TODO: implement more tests
 }
 
@@ -56,6 +61,7 @@ func TestVM(t *testing.T) {
 	for _, test := range vmTests {
 		tree := parser.Parse(test.input)
 		program, err := compiler.Compile(tree)
+		// print(program.Instructions.String())
 		vm := New(program.Instructions, program.Constants)
 		err = vm.Run()
 		require.NoError(t, err, test.input)
@@ -70,15 +76,7 @@ func testExpectedObject(
 	actual interface{},
 ) {
 	switch expected := expected.(type) {
-	case bool:
-		assert.Equal(t, expected, actual)
-	case int:
-		assert.Equal(t, expected, actual)
-	case int64:
-		assert.Equal(t, expected, actual)
-	case float64:
-		assert.Equal(t, expected, actual)
-	case nil:
+	case bool, int, int64, float64, nil, string, []interface{}:
 		assert.Equal(t, expected, actual)
 	}
 }

@@ -148,7 +148,10 @@ func (compiler *Compiler) NodeFunction(node *ast.FunctionNode) {
 }
 
 func (compiler *Compiler) NodeArray(node *ast.ArrayNode) {
-	// TODO: implement
+	for _, node := range node.Nodes {
+		compiler.compile(node)
+	}
+	compiler.emit(code.OpArray, len(node.Nodes))
 }
 
 func (compiler *Compiler) addInstruction(ins code.Instructions) int {

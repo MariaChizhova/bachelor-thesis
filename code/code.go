@@ -33,6 +33,8 @@ const (
 	OpGreaterOrEqual
 
 	OpMinus
+
+	OpArray
 )
 
 type Definition struct {
@@ -64,6 +66,8 @@ var definitions = map[Opcode]*Definition{
 	OpGreaterOrEqual: {"OpGreaterOrEqual", []int{}},
 
 	OpMinus: {"OpMinus", []int{}},
+
+	OpArray: {"OpArray", []int{2}},
 }
 
 func Make(op Opcode, operands ...int) Instructions {

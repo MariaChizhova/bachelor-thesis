@@ -93,6 +93,17 @@ func (vm *VM) Run() error {
 			}
 		case code.OpEqual, code.OpNotEqual, code.OpLessThan, code.OpGreaterThan, code.OpLessOrEqual, code.OpGreaterOrEqual:
 			vm.push(vm.executeComparisonOperation(code.Opcode(vm.instructions[ip])))
+		case code.OpArray:
+			numElements := int(binary.BigEndian.Uint16(vm.instructions[ip+1:]))
+			ip += 2
+			array := make([]interface{}, numElements)
+			for i := numElements - 1; i >= 0; i-- {
+				array[i] = vm.pop()
+			}
+			err := vm.push(array)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
