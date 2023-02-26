@@ -162,6 +162,8 @@ loop:
 		default:
 			lexer.backup()
 			switch lexer.word() {
+			case "not":
+				lexer.emit(itemOperator)
 			case "or", "and":
 				lexer.emit(itemOperator)
 			case "true", "false":

@@ -54,6 +54,8 @@ var vmTests = []vmTest{
 	{"[]", []interface{}{}},
 	{"[1, 2, 3.1]", []interface{}{int64(1), int64(2), 3.1}},
 	{"[1 + 2, 2 * 3]", []interface{}{3, 6}},
+	{"not true", false},
+	{"not false", true},
 	// TODO: implement more tests
 }
 

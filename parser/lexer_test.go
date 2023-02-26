@@ -87,6 +87,14 @@ var lexTests = []lexTest{
 			{tokenType: itemEOF},
 		},
 	},
+	{
+		`not true`,
+		[]Token{
+			{tokenType: itemOperator, val: "not"},
+			{tokenType: itemBool, val: "true"},
+			{tokenType: itemEOF},
+		},
+	},
 }
 
 func compareTokens(token1, token2 []Token) bool {

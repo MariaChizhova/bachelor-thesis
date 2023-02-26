@@ -35,6 +35,12 @@ const (
 	OpMinus
 
 	OpArray
+	// OpIndex
+
+	OpNot
+
+	OpGetGlobal
+	OpSetGlobal
 )
 
 type Definition struct {
@@ -68,6 +74,12 @@ var definitions = map[Opcode]*Definition{
 	OpMinus: {"OpMinus", []int{}},
 
 	OpArray: {"OpArray", []int{2}},
+	// OpIndex: {"OpIndex", []int{}},
+
+	OpNot: {"OpNot", []int{}},
+	
+	OpGetGlobal: {"OpGetGlobal", []int{2}},
+	OpSetGlobal: {"OpSetGlobal", []int{2}},
 }
 
 func Make(op Opcode, operands ...int) Instructions {

@@ -104,7 +104,11 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case code.OpNot:
+			v := vm.pop().(bool)
+			vm.push(!v)
 		}
+
 	}
 	return nil
 }

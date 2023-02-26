@@ -88,6 +88,8 @@ func (compiler *Compiler) NodeUnary(node *ast.UnaryNode) {
 
 	case "-":
 		compiler.emit(code.OpMinus)
+	case "not":
+		compiler.emit(code.OpNot)
 	}
 	// compiler.emit(code.OpPop)
 }

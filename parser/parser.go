@@ -16,8 +16,9 @@ type Parser struct {
 }
 
 var unaryOperators = map[string]int{
-	"-": 6,
-	"+": 6,
+	"not": 6,
+	"-":   7,
+	"+":   7,
 }
 
 var binaryOperators = map[string]int{
