@@ -1,8 +1,8 @@
 package vm
 
 import (
-	"bachelor-thesis/compiler"
 	"bachelor-thesis/parser"
+	"bachelor-thesis/vm/compiler"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -56,6 +56,8 @@ var vmTests = []vmTest{
 	{"[1 + 2, 2 * 3]", []interface{}{3, 6}},
 	{"not true", false},
 	{"not false", true},
+	// {"true or false", true},
+	// {"true and false", false},
 	// TODO: implement more tests
 }
 

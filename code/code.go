@@ -31,6 +31,8 @@ const (
 	OpGreaterThan
 	OpLessOrEqual
 	OpGreaterOrEqual
+	OpJumpIfTrue
+	OpJumpIfFalse
 
 	OpMinus
 
@@ -70,6 +72,8 @@ var definitions = map[Opcode]*Definition{
 	OpGreaterThan:    {"OpGreaterThan", []int{}},
 	OpLessOrEqual:    {"OpLessOrEqual", []int{}},
 	OpGreaterOrEqual: {"OpGreaterOrEqual", []int{}},
+	OpJumpIfTrue:     {"OpJumpIfTrue", []int{}},
+	OpJumpIfFalse:    {"OpJumpIfFalse", []int{}},
 
 	OpMinus: {"OpMinus", []int{}},
 
@@ -77,7 +81,7 @@ var definitions = map[Opcode]*Definition{
 	// OpIndex: {"OpIndex", []int{}},
 
 	OpNot: {"OpNot", []int{}},
-	
+
 	OpGetGlobal: {"OpGetGlobal", []int{2}},
 	OpSetGlobal: {"OpSetGlobal", []int{2}},
 }

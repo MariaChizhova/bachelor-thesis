@@ -190,6 +190,16 @@ var compilerTests = []compilerTest{
 			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpTrue), code.Make(code.OpNot)}),
 		},
 	},
+	{
+		`true or false`,
+		Program{
+			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpTrue),
+				code.Make(code.OpJumpIfTrue),
+				code.Make(code.OpPop),
+				code.Make(code.OpFalse)}),
+		},
+	},
 }
 
 func TestCompiler(t *testing.T) {

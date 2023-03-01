@@ -95,51 +95,83 @@ func (compiler *Compiler) NodeUnary(node *ast.UnaryNode) {
 }
 
 func (compiler *Compiler) NodeBinary(node *ast.BinaryNode) {
-	compiler.compile(node.Left)
-	compiler.compile(node.Right)
 	switch node.Operator {
 	case "+":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpAdd)
 
 	case "-":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpSub)
 
 	case "*":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpMul)
 
 	case "/":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpDiv)
 
 	case "%":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpMod)
 
 	case "^":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpExp)
 
 	case "==":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		// TODO: check expr
 		compiler.emit(code.OpEqual)
 
 	case "!=":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpNotEqual)
 
 	case ">":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpGreaterThan)
 
 	case "<":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpLessThan)
 
 	case ">=":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpGreaterOrEqual)
 
 	case "<=":
+		compiler.compile(node.Left)
+		compiler.compile(node.Right)
 		compiler.emit(code.OpLessOrEqual)
 
 	case "or":
-		// TODO:
+		compiler.compile(node.Left)
+		//end :=
+		compiler.emit(code.OpJumpIfTrue)
+		compiler.emit(code.OpPop)
+		compiler.compile(node.Right)
+		//compiler.patchJump(end)
 
 	case "and":
-		// TODO:
+		compiler.compile(node.Left)
+		//end :=
+		compiler.emit(code.OpJumpIfFalse)
+		compiler.emit(code.OpPop)
+		compiler.compile(node.Right)
+		//compiler.patchJump(end)
 
 	}
 	// compiler.emit(code.OpPop)

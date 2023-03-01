@@ -35,6 +35,10 @@ func (vm *VM) LastPoppedStackElem() interface{} {
 	return vm.stack[vm.sp]
 }
 
+func (vm *VM) Current() interface{} {
+	return vm.stack[len(vm.stack)-1]
+}
+
 func (vm *VM) Run() error {
 	for ip := 0; ip < len(vm.instructions); ip++ {
 		switch code.Opcode(vm.instructions[ip]) {
@@ -107,6 +111,9 @@ func (vm *VM) Run() error {
 		case code.OpNot:
 			v := vm.pop().(bool)
 			vm.push(!v)
+
+		case code.OpJumpIfTrue:
+		case code.OpJumpIfFalse:
 		}
 
 	}
