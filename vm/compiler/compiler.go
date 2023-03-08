@@ -1,8 +1,8 @@
 package compiler
 
 import (
-	"bachelor-thesis/code"
 	"bachelor-thesis/parser/ast"
+	"bachelor-thesis/vm/code"
 )
 
 type Compiler struct {

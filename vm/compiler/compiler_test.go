@@ -1,8 +1,8 @@
 package compiler
 
 import (
-	"bachelor-thesis/code"
 	"bachelor-thesis/parser"
+	"bachelor-thesis/vm/code"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"

@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"bachelor-thesis/code"
+	"bachelor-thesis/vm/code"
 	"fmt"
 	"math"
 )

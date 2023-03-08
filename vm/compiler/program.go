@@ -1,7 +1,7 @@
 package compiler
 
 import (
-	"bachelor-thesis/code"
+	"bachelor-thesis/vm/code"
 )
 
 // Program TODO: move to vm
