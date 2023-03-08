@@ -1,19 +1,18 @@
-package vm
+package interpreter
 
 import (
 	"bachelor-thesis/parser"
-	"bachelor-thesis/vm/compiler"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-type vmTest struct {
+type evaluatorTest struct {
 	input    string
 	expected interface{}
 }
 
-var vmTests = []vmTest{
+var evaluatorTests = []evaluatorTest{
 	{"true", true},
 	{"false", false},
 	{"nil", nil},
@@ -21,10 +20,10 @@ var vmTests = []vmTest{
 	{"-1", int64(-1)},
 	{"2.4", 2.4},
 	{"-2.4", -2.4},
-	{"1 + 2", 3},
-	{"1 - 2", -1},
-	{"1 * 2", 2},
-	{"4 / 2", 2},
+	{"1 + 2", int64(3)},
+	{"1 - 2", int64(-1)},
+	{"1 * 2", int64(2)},
+	{"4 / 2", int64(2)},
 	{"2 ^ 2", 4},
 	{"5 % 2", int64(1)},
 	{"1 < 2", true},
@@ -38,13 +37,13 @@ var vmTests = []vmTest{
 	{"(1.1 + 2.1) * 4.1", 13.12},
 	{"1.2 + 3  < 4", false},
 	{"(1 + 2) * 4", int64(12)},
-	{"5 * 2 + 10", 20},
-	{"5 + 2 * 10", 25},
-	{"10 / 2 * 2 + 10 - 5", 15},
+	{"5 * 2 + 10", int64(20)},
+	{"5 + 2 * 10", int64(25)},
+	{"10 / 2 * 2 + 10 - 5", int64(15)},
 	{"5 * (2 + 10)", int64(60)},
-	{"-5 + 10 + -5", 0},
+	{"-5 + 10 + -5", int64(0)},
 	{"2 * 2 * 2 * 2 * 2", int64(32)},
-	{"1 - 2 + 3 * 4 / 2 ^ 2 % 3", -1},
+	{"1 - 2 + 3 * 4 / 2 ^ 2 % 3", int64(-1)},
 	{"true == true", true},
 	{"true == false", false},
 	{"true != false", true},
@@ -57,34 +56,16 @@ var vmTests = []vmTest{
 	{`"hello " + "world!"`, "hello world!"},
 	{"[]", []interface{}{}},
 	{"[1, 2, 3.1]", []interface{}{int64(1), int64(2), 3.1}},
-	{"[1 + 2, 2 * 3]", []interface{}{3, 6}},
+	{"[1 + 2, 2 * 3]", []interface{}{int64(3), int64(6)}},
 	{"not true", false},
 	{"not false", true},
-	// {"true or false", true},
-	// {"true and false", false},
-	// TODO: implement more tests
 }
 
-func TestVM(t *testing.T) {
-	for _, test := range vmTests {
+func TestEvaluator(t *testing.T) {
+	for _, test := range evaluatorTests {
 		tree := parser.Parse(test.input)
-		program, err := compiler.Compile(tree)
-		// print(program.Instructions.String())
-		vm := New(program.Instructions, program.Constants)
-		err = vm.Run()
+		evaluated, err := Eval(tree)
 		require.NoError(t, err, test.input)
-		stackElem := vm.StackTop() // vm.LastPoppedStackElem()
-		testExpectedObject(t, test.expected, stackElem)
-	}
-}
-
-func testExpectedObject(
-	t *testing.T,
-	expected interface{},
-	actual interface{},
-) {
-	switch expected := expected.(type) {
-	case bool, int, int64, float64, nil, string, []interface{}:
-		assert.Equal(t, expected, actual)
+		assert.Equal(t, test.expected, evaluated)
 	}
 }

@@ -290,6 +290,11 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 			case float64:
 				return x == y
 			}
+		case string:
+			switch x := b.(type) {
+			case string:
+				return x == y
+			}
 		}
 	case code.OpNotEqual:
 		switch y := a.(type) {
@@ -312,7 +317,12 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 			case float64:
 				return x != y
 			}
+		case string:
+			switch x := b.(type) {
+			case string:
+				return x != y
+			}
 		}
 	}
-	panic(fmt.Sprintf("invalid operation: %T < %T", a, b))
+	panic(fmt.Sprintf("invalid operation: %T comparison %T", a, b))
 }
