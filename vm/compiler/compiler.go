@@ -159,22 +159,21 @@ func (compiler *Compiler) NodeBinary(node *ast.BinaryNode) {
 
 	case "or":
 		compiler.compile(node.Left)
-		//end :=
 		compiler.emit(code.OpJumpIfTrue)
 		compiler.emit(code.OpPop)
 		compiler.compile(node.Right)
-		//compiler.patchJump(end)
 
 	case "and":
 		compiler.compile(node.Left)
-		//end :=
 		compiler.emit(code.OpJumpIfFalse)
 		compiler.emit(code.OpPop)
 		compiler.compile(node.Right)
-		//compiler.patchJump(end)
-
 	}
 	// compiler.emit(code.OpPop)
+}
+
+func (compiler *Compiler) patchJump(placeholder int) {
+	//compiler.arguments[placeholder-1] = len(compiler.instructions) - placeholder
 }
 
 func (compiler *Compiler) NodeFunction(node *ast.FunctionNode) {

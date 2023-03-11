@@ -59,6 +59,10 @@ var evaluatorTests = []evaluatorTest{
 	{"[1 + 2, 2 * 3]", []interface{}{int64(3), int64(6)}},
 	{"not true", false},
 	{"not false", true},
+	{"true or false", true},
+	{"true and false", false},
+	{"(5 > 2) and (2 <= 3) == true", true},
+	{"(1 > 2) or (2 >= 3) == false", true},
 }
 
 func TestEvaluator(t *testing.T) {

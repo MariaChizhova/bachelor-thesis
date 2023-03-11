@@ -79,6 +79,30 @@ func EvalBinary(node ast.Node) (interface{}, error) {
 		return nil, err
 	}
 	switch node.(*ast.BinaryNode).Operator {
+	case "or":
+		switch l := left.(type) {
+		case bool:
+			switch r := right.(type) {
+			case bool:
+				return l || r, nil
+			default:
+				return nil, fmt.Errorf("non-bool value in cond (%T)", r)
+			}
+		default:
+			return nil, fmt.Errorf("non-bool value in cond (%T)", l)
+		}
+	case "and":
+		switch l := left.(type) {
+		case bool:
+			switch r := right.(type) {
+			case bool:
+				return l && r, nil
+			default:
+				return nil, fmt.Errorf("non-bool value in cond (%T)", r)
+			}
+		default:
+			return nil, fmt.Errorf("non-bool value in cond (%T)", l)
+		}
 	case "+":
 		switch l := left.(type) {
 		case int64:
