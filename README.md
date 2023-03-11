@@ -9,7 +9,6 @@ Bool       | Booleans                      | `true` `false`                     
 string     | strings                       | `"abc"` `'abc'`                          | 
 nil        | The value `nil`               | `nil`                                    | 
 array      | list of values                | `["a", "b", "c"]`                        
-variable   |                               | `a = 5`                                  |
 
 ### Operators 
 
