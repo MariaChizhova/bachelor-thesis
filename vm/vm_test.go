@@ -38,13 +38,13 @@ var vmTests = []vmTest{
 	{"(1.1 + 2.1) * 4.1", 13.12},
 	{"1.2 + 3  < 4", false},
 	{"(1 + 2) * 4", int64(12)},
-	{"5 * 2 + 10", 20},
-	{"5 + 2 * 10", 25},
-	{"10 / 2 * 2 + 10 - 5", 15},
+	{"5 * 2 + 10", int64(20)},
+	{"5 + 2 * 10", int64(25)},
+	{"10 / 2 * 2 + 10 - 5", int64(15)},
 	{"5 * (2 + 10)", int64(60)},
-	{"-5 + 10 + -5", 0},
+	{"-5 + 10 + -5", int64(0)},
 	{"2 * 2 * 2 * 2 * 2", int64(32)},
-	{"1 - 2 + 3 * 4 / 2 ^ 2 % 3", -1},
+	{"1 - 2 + 3 * 4 / 2 ^ 2 % 3", int64(-1)},
 	{"true == true", true},
 	{"true == false", false},
 	{"true != false", true},
@@ -57,7 +57,7 @@ var vmTests = []vmTest{
 	{`"hello " + "world!"`, "hello world!"},
 	{"[]", []interface{}{}},
 	{"[1, 2, 3.1]", []interface{}{int64(1), int64(2), 3.1}},
-	{"[1 + 2, 2 * 3]", []interface{}{3, 6}},
+	{"[1 + 2, 2 * 3]", []interface{}{int64(3), int64(6)}},
 	{"not true", false},
 	{"not false", true},
 	// {"true or false", true},
@@ -84,7 +84,7 @@ func testExpectedObject(
 	actual interface{},
 ) {
 	switch expected := expected.(type) {
-	case bool, int, int64, float64, nil, string, []interface{}:
+	case bool, int64, float64, nil, string, []interface{}:
 		assert.Equal(t, expected, actual)
 	}
 }

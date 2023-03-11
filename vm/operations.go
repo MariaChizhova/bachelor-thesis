@@ -6,33 +6,17 @@ import (
 	"math"
 )
 
-// TODO: check and change these functions
-// TODO: check when it's int64 and when it's int
-
 func (vm *VM) executeAddOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
-	case int:
-		switch y := b.(type) {
-		case int:
-			return x + y
-		case int64:
-			return x + int(y)
-		case float64:
-			return float64(x) + y
-		}
 	case int64:
 		switch y := b.(type) {
-		case int:
-			return int(x) + y
 		case int64:
-			return int(x) + int(y)
+			return x + y
 		case float64:
 			return float64(x) + y
 		}
 	case float64:
 		switch y := b.(type) {
-		case int:
-			return x + float64(y)
 		case int64:
 			return x + float64(y)
 		case float64:
@@ -49,28 +33,15 @@ func (vm *VM) executeAddOperation(a, b interface{}) interface{} {
 
 func (vm *VM) executeSubtractOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
-	case int:
-		switch y := b.(type) {
-		case int:
-			return x - y
-		case int64:
-			return x - int(y)
-		case float64:
-			return float64(x) - y
-		}
 	case int64:
 		switch y := b.(type) {
-		case int:
-			return int(x) - y
 		case int64:
-			return int(x) - int(y)
+			return x - y
 		case float64:
 			return float64(x) - y
 		}
 	case float64:
 		switch y := b.(type) {
-		case int:
-			return x - float64(y)
 		case int64:
 			return x - float64(y)
 		case float64:
@@ -82,28 +53,15 @@ func (vm *VM) executeSubtractOperation(a, b interface{}) interface{} {
 
 func (vm *VM) executeMultiplyOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
-	case int:
-		switch y := b.(type) {
-		case int:
-			return x * y
-		case int64:
-			return int64(x) * y
-		case float64:
-			return float64(x) * y
-		}
 	case int64:
 		switch y := b.(type) {
-		case int:
-			return x * int64(y)
 		case int64:
-			return int(x) * int(y)
+			return x * y
 		case float64:
 			return float64(x) * y
 		}
 	case float64:
 		switch y := b.(type) {
-		case int:
-			return x * float64(y)
 		case int64:
 			return x * float64(y)
 		case float64:
@@ -114,28 +72,15 @@ func (vm *VM) executeMultiplyOperation(a, b interface{}) interface{} {
 }
 func (vm *VM) executeDivideOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
-	case int:
-		switch y := b.(type) {
-		case int:
-			return x / y
-		case int64:
-			return int64(x) / y
-		case float64:
-			return float64(x) / y
-		}
 	case int64:
 		switch y := b.(type) {
-		case int:
-			return x / int64(y)
 		case int64:
-			return int(x) / int(y)
+			return x / y
 		case float64:
 			return float64(x) / y
 		}
 	case float64:
 		switch y := b.(type) {
-		case int:
-			return x / float64(y)
 		case int64:
 			return x / float64(y)
 		case float64:
@@ -146,17 +91,8 @@ func (vm *VM) executeDivideOperation(a, b interface{}) interface{} {
 }
 func (vm *VM) executeRemainderOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
-	case int:
-		switch y := b.(type) {
-		case int:
-			return x % y
-		case int64:
-			return int64(x) % y
-		}
 	case int64:
 		switch y := b.(type) {
-		case int:
-			return x % int64(y)
 		case int64:
 			return x % y
 		}
@@ -168,7 +104,7 @@ func (vm *VM) executeExponentiationOperation(a, b interface{}) interface{} {
 	case int64:
 		switch y := b.(type) {
 		case int64:
-			return int(math.Pow(float64(x), float64(y)))
+			return int64(math.Pow(float64(x), float64(y)))
 		case float64:
 			return math.Pow(float64(x), y)
 		}
@@ -186,8 +122,6 @@ func (vm *VM) executeExponentiationOperation(a, b interface{}) interface{} {
 func (vm *VM) executeMinusOperator() interface{} {
 	operand := vm.pop()
 	switch x := operand.(type) {
-	case int:
-		return -x
 	case int64:
 		return -x
 	case float64:
@@ -206,7 +140,7 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 		case int64:
 			switch x := b.(type) {
 			case int64:
-				return int(x) < int(y)
+				return x < y
 			case float64:
 				return x < float64(y)
 			}
@@ -223,7 +157,7 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 		case int64:
 			switch x := b.(type) {
 			case int64:
-				return int(x) <= int(y)
+				return x <= y
 			case float64:
 				return x <= float64(y)
 			}
@@ -240,7 +174,7 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 		case int64:
 			switch x := b.(type) {
 			case int64:
-				return int(x) > int(y)
+				return x > y
 			case float64:
 				return x > float64(y)
 			}
@@ -257,7 +191,7 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 		case int64:
 			switch x := b.(type) {
 			case int64:
-				return int(x) >= int(y)
+				return x >= y
 			case float64:
 				return x >= float64(y)
 			}
@@ -279,7 +213,7 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 		case int64:
 			switch x := b.(type) {
 			case int64:
-				return int(x) == int(y)
+				return x == y
 			case float64:
 				return x == float64(y)
 			}
@@ -306,7 +240,7 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 		case int64:
 			switch x := b.(type) {
 			case int64:
-				return int(x) != int(y)
+				return x != y
 			case float64:
 				return x != float64(y)
 			}

@@ -1,4 +1,4 @@
-package interpreter
+package evaluator
 
 import (
 	"bachelor-thesis/parser"
@@ -24,7 +24,7 @@ var evaluatorTests = []evaluatorTest{
 	{"1 - 2", int64(-1)},
 	{"1 * 2", int64(2)},
 	{"4 / 2", int64(2)},
-	{"2 ^ 2", 4},
+	{"2 ^ 2", int64(4)},
 	{"5 % 2", int64(1)},
 	{"1 < 2", true},
 	{"1 < 1", false},

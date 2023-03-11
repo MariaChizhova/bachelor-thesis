@@ -1,4 +1,4 @@
-package interpreter
+package evaluator
 
 import (
 	"bachelor-thesis/parser/ast"
@@ -159,18 +159,13 @@ func EvalBinary(node ast.Node) (interface{}, error) {
 			case int64:
 				return l % r, nil
 			}
-		case int:
-			switch r := right.(type) {
-			case int64:
-				return int64(l) % r, nil
-			}
 		}
 	case "^":
 		switch l := left.(type) {
 		case int64:
 			switch r := right.(type) {
 			case int64:
-				return int(math.Pow(float64(l), float64(r))), nil
+				return int64(math.Pow(float64(l), float64(r))), nil
 			case float64:
 				return math.Pow(float64(l), r), nil
 			}
