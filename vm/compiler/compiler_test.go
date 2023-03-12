@@ -200,13 +200,41 @@ var compilerTests = []compilerTest{
 				code.Make(code.OpFalse)}),
 		},
 	},
+	{
+		"[1, 2, 3][1 + 1]",
+		Program{
+			Constants: []interface{}{int64(1), int64(2), int64(3), int64(1), int64(1)},
+			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpArray, 3),
+				code.Make(code.OpConstant, 3),
+				code.Make(code.OpConstant, 4),
+				code.Make(code.OpAdd),
+				code.Make(code.OpIndex)}),
+		},
+	},
+	{
+		`["a", "b"][1]`,
+		Program{
+			Constants: []interface{}{"a", "b", int64(1)},
+			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpConstant, 0),
+				code.Make(code.OpConstant, 1),
+				code.Make(code.OpArray, 2),
+				code.Make(code.OpConstant, 2),
+				code.Make(code.OpIndex),
+				/*code.Make(code.OpPop)*/}),
+		},
+	},
 }
 
 func TestCompiler(t *testing.T) {
 	for _, test := range compilerTests {
 		tree := parser.Parse(test.input)
 		program, err := Compile(tree)
-		// print(program.Instructions.String())
+		//print(program.Instructions.String())
 		require.NoError(t, err, test.input)
 		assert.Equal(t, test.program.Instructions, program.Instructions)
 		assert.Equal(t, test.program.Constants, program.Constants)

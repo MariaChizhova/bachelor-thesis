@@ -26,6 +26,8 @@ func Eval(node ast.Node) (interface{}, error) {
 		//return
 	case ast.NodeArray:
 		return EvalArray(node)
+	case ast.NodeMember:
+		return EvalIndex(node)
 	}
 	return nil, nil
 }
@@ -337,4 +339,26 @@ func EvalArray(node ast.Node) (interface{}, error) {
 		array = append(array, value)
 	}
 	return array, nil
+}
+
+func EvalIndex(node ast.Node) (interface{}, error) {
+	array, err := Eval(node.(*ast.MemberNode).Node)
+	if err != nil {
+		return array, err
+	}
+	index, err := Eval(node.(*ast.MemberNode).Property)
+	if err != nil {
+		return index, err
+	}
+	arrayObject := array.([]interface{})
+	i := index.(int64)
+	max := int64(len(arrayObject) - 1)
+	if i < 0 || i > max {
+		return nil, nil
+	}
+	switch t := arrayObject[i].(type) {
+	case int64, float64, bool, string:
+		return t, nil
+	}
+	return nil, nil
 }

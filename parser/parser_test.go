@@ -144,6 +144,17 @@ var parseTests = []parseTest{
 		},
 	},
 	{
+		"[a, b][0]",
+		&ast.MemberNode{
+			NodeType: ast.NodeMember,
+			Node: &ast.ArrayNode{
+				Nodes: []ast.Node{&ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+					&ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+				NodeType: ast.NodeArray,
+			},
+			Property: &ast.NumberNode{Value: fmt.Sprint(0), Int64: 0, IsInt: true, IsFloat: false, NodeType: ast.NodeNumber}},
+	},
+	{
 		"[a, [b, c]]",
 		&ast.ArrayNode{
 			Nodes: []ast.Node{&ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},

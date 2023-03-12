@@ -71,8 +71,30 @@ func (parser *Parser) parsePrimaryExpression() ast.Node {
 		return &ast.IdentifierNode{Value: token.val, NodeType: ast.NodeIdentifier}
 	default:
 		var node ast.Node
-		return node
+		return parser.parsePostfixExpression(node)
 	}
+}
+
+func (parser *Parser) parsePostfixExpression(node ast.Node) ast.Node {
+	currToken := parser.currToken
+	for currToken.val == "[" {
+		if currToken.val == "[" {
+			parser.next()
+			from := parser.parseExpression(0)
+			node = &ast.MemberNode{
+				NodeType: ast.NodeMember,
+				Node:     node,
+				Property: from,
+			}
+			if parser.currToken.val == "]" {
+				parser.next()
+			} else {
+				parser.errorf("')' is expected")
+			}
+		}
+		currToken = parser.currToken
+	}
+	return node
 }
 
 func (parser *Parser) parsePrimary() ast.Node {
@@ -83,7 +105,7 @@ func (parser *Parser) parsePrimary() ast.Node {
 			parser.next()
 			expr := parser.parseExpression(unaryOperators[token.val])
 			node := &ast.UnaryNode{Operator: token.val, Node: expr}
-			return node
+			return parser.parsePostfixExpression(node)
 		}
 	case itemBracket:
 		if token.val == "(" {
@@ -94,9 +116,9 @@ func (parser *Parser) parsePrimary() ast.Node {
 			} else {
 				parser.errorf("')' is expected")
 			}
-			return expr
+			return parser.parsePostfixExpression(expr)
 		} else if token.val == "[" {
-			return parser.parseArray()
+			return parser.parsePostfixExpression(parser.parseArray())
 		}
 	}
 	return parser.parsePrimaryExpression()

@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	node := parser.Parse("a")
+	node := parser.Parse("[1][0]")
 	fmt.Print(ast.Print(node))
 }

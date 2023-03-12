@@ -49,6 +49,8 @@ func (compiler *Compiler) compile(node ast.Node) {
 		compiler.NodeFunction(node.(*ast.FunctionNode))
 	case ast.NodeArray:
 		compiler.NodeArray(node.(*ast.ArrayNode))
+	case ast.NodeMember:
+		compiler.NodeMember(node.(*ast.MemberNode))
 	}
 }
 
@@ -172,10 +174,6 @@ func (compiler *Compiler) NodeBinary(node *ast.BinaryNode) {
 	// compiler.emit(code.OpPop)
 }
 
-func (compiler *Compiler) patchJump(placeholder int) {
-	//compiler.arguments[placeholder-1] = len(compiler.instructions) - placeholder
-}
-
 func (compiler *Compiler) NodeFunction(node *ast.FunctionNode) {
 	// TODO: implement
 }
@@ -185,6 +183,12 @@ func (compiler *Compiler) NodeArray(node *ast.ArrayNode) {
 		compiler.compile(node)
 	}
 	compiler.emit(code.OpArray, len(node.Nodes))
+}
+
+func (compiler *Compiler) NodeMember(node *ast.MemberNode) {
+	compiler.compile(node.Node)
+	compiler.compile(node.Property)
+	compiler.emit(code.OpIndex)
 }
 
 func (compiler *Compiler) addInstruction(ins code.Instructions) int {

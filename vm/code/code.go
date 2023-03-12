@@ -37,7 +37,7 @@ const (
 	OpMinus
 
 	OpArray
-	// OpIndex
+	OpIndex
 
 	OpNot
 
@@ -78,7 +78,7 @@ var definitions = map[Opcode]*Definition{
 	OpMinus: {"OpMinus", []int{}},
 
 	OpArray: {"OpArray", []int{2}},
-	// OpIndex: {"OpIndex", []int{}},
+	OpIndex: {"OpIndex", []int{}},
 
 	OpNot: {"OpNot", []int{}},
 

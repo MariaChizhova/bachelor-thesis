@@ -104,6 +104,10 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+		case code.OpIndex:
+			index := vm.pop()
+			array := vm.pop()
+			vm.executeIndexOperation(array, index)
 		case code.OpNot:
 			v := vm.pop().(bool)
 			vm.push(!v)

@@ -90,6 +90,12 @@ type ArrayNode struct {
 	Nodes []Node
 }
 
+type MemberNode struct {
+	NodeType
+	Node     Node
+	Property Node
+}
+
 const (
 	NodeNumber NodeType = iota
 	NodeIdentifier
@@ -100,4 +106,5 @@ const (
 	NodeBinary
 	NodeFunction
 	NodeArray
+	NodeMember
 )
