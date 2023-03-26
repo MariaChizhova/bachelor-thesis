@@ -228,6 +228,12 @@ var compilerTests = []compilerTest{
 				/*code.Make(code.OpPop)*/}),
 		},
 	},
+	//{
+	//	`foo()`,
+	//	Program{
+	//		// TODO:
+	//	},
+	//},
 }
 
 func TestCompiler(t *testing.T) {

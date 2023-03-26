@@ -45,8 +45,8 @@ func (compiler *Compiler) compile(node ast.Node) {
 		compiler.NodeUnary(node.(*ast.UnaryNode))
 	case ast.NodeBinary:
 		compiler.NodeBinary(node.(*ast.BinaryNode))
-	case ast.NodeFunction:
-		compiler.NodeFunction(node.(*ast.FunctionNode))
+	case ast.NodeCall:
+		compiler.NodeFunction(node.(*ast.CallNode))
 	case ast.NodeArray:
 		compiler.NodeArray(node.(*ast.ArrayNode))
 	case ast.NodeMember:
@@ -174,7 +174,7 @@ func (compiler *Compiler) NodeBinary(node *ast.BinaryNode) {
 	// compiler.emit(code.OpPop)
 }
 
-func (compiler *Compiler) NodeFunction(node *ast.FunctionNode) {
+func (compiler *Compiler) NodeFunction(node *ast.CallNode) {
 	// TODO: implement
 }
 

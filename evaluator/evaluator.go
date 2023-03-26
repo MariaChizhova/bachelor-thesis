@@ -22,8 +22,8 @@ func Eval(node ast.Node) (interface{}, error) {
 		return EvalUnary(node)
 	case ast.NodeBinary:
 		return EvalBinary(node)
-	case ast.NodeFunction:
-		//return
+	case ast.NodeCall:
+		return EvalFunctionCall(node)
 	case ast.NodeArray:
 		return EvalArray(node)
 	case ast.NodeMember:
@@ -360,5 +360,9 @@ func EvalIndex(node ast.Node) (interface{}, error) {
 	case int64, float64, bool, string:
 		return t, nil
 	}
+	return nil, nil
+}
+
+func EvalFunctionCall(node ast.Node) (interface{}, error) {
 	return nil, nil
 }

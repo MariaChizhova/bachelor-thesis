@@ -168,10 +168,10 @@ func (parser *Parser) parseFunctionCall(token Token) ast.Node {
 	if parser.currToken.val == ")" {
 		parser.next()
 	}
-	return &ast.FunctionNode{
+	return &ast.CallNode{
 		Function:  &ast.IdentifierNode{Value: token.val, NodeType: ast.NodeIdentifier},
 		Arguments: arguments,
-		NodeType:  ast.NodeFunction,
+		NodeType:  ast.NodeCall,
 	}
 }
 

@@ -79,7 +79,7 @@ func (node *BinaryNode) Type() NodeType {
 	return NodeBinary
 }
 
-type FunctionNode struct {
+type CallNode struct {
 	NodeType
 	Function  Node
 	Arguments []Node
@@ -104,7 +104,7 @@ const (
 	NodeNil
 	NodeUnary
 	NodeBinary
-	NodeFunction
+	NodeCall
 	NodeArray
 	NodeMember
 )
