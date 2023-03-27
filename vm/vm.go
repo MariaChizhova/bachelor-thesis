@@ -25,8 +25,6 @@ func New(instructions code.Instructions, constants []interface{}) *VM {
 }
 
 func (vm *VM) StackTop() interface{} {
-	fmt.Println("stack:", vm.stack)
-	fmt.Println("sp:", vm.sp)
 	if vm.sp == 0 {
 		return nil
 	}

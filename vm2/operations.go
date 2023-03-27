@@ -120,7 +120,7 @@ func (vm *VM) executeExponentiationOperation(a, b interface{}) interface{} {
 }
 
 func (vm *VM) executeMinusOperator() interface{} {
-	operand := vm.pop()
+	operand, _ := vm.pop()
 	switch x := operand.(type) {
 	case int64:
 		return -x
@@ -130,10 +130,7 @@ func (vm *VM) executeMinusOperator() interface{} {
 	panic(fmt.Errorf("unsupported type for negation: %s", operand))
 }
 
-func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
-	a := vm.pop()
-	b := vm.pop()
-
+func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode code.Opcode) interface{} {
 	switch opcode {
 	case code.OpLessThan:
 		switch y := a.(type) {

@@ -6,6 +6,8 @@ import (
 	"fmt"
 )
 
+const StackSize = 2048
+
 type VM struct {
 	constants    []interface{}
 	instructions code.Instructions
@@ -18,23 +20,23 @@ func New(instructions code.Instructions, constants []interface{}) *VM {
 	return &VM{
 		instructions: instructions,
 		constants:    constants,
-		stack:        make([]interface{}, 0),
-		stackString:  make([]string, 0),
+		stack:        make([]interface{}, StackSize),
+		stackString:  make([]string, StackSize),
 		sp:           0,
 	}
 }
 
 func (vm *VM) StackTop() interface{} {
-	fmt.Println("stack:", vm.stack)
-	fmt.Println("stackString:", vm.stackString)
-	fmt.Println("sp:", vm.sp)
 	if vm.sp == 0 {
 		return nil
 	}
-	if len(vm.stackString) > 0 {
-		return vm.stackString[len(vm.stackString)-1]
+	if vm.stack[vm.sp-1] != nil {
+		return vm.stack[vm.sp-1]
+	} else if vm.stackString[vm.sp-1] != "" {
+		return vm.stackString[vm.sp-1]
+	} else {
+		return nil
 	}
-	return vm.stack[len(vm.stack)-1]
 }
 
 func (vm *VM) Run() error {
@@ -68,28 +70,32 @@ func (vm *VM) Run() error {
 				return err
 			}
 		case code.OpAdd:
-			a := vm.pop()
-			b := vm.pop()
-			vm.push(vm.executeAddOperation(b, a))
+			a, as := vm.pop()
+			b, bs := vm.pop()
+			if a == nil && b == nil {
+				vm.push(bs + as)
+			} else {
+				vm.push(vm.executeAddOperation(b, a))
+			}
 		case code.OpSub:
-			a := vm.pop()
-			b := vm.pop()
+			a, _ := vm.pop()
+			b, _ := vm.pop()
 			vm.push(vm.executeSubtractOperation(b, a))
 		case code.OpMul:
-			a := vm.pop()
-			b := vm.pop()
+			a, _ := vm.pop()
+			b, _ := vm.pop()
 			vm.push(vm.executeMultiplyOperation(a, b))
 		case code.OpDiv:
-			a := vm.pop()
-			b := vm.pop()
+			a, _ := vm.pop()
+			b, _ := vm.pop()
 			vm.push(vm.executeDivideOperation(b, a))
 		case code.OpMod:
-			a := vm.pop()
-			b := vm.pop()
+			a, _ := vm.pop()
+			b, _ := vm.pop()
 			vm.push(vm.executeRemainderOperation(b, a))
 		case code.OpExp:
-			a := vm.pop()
-			b := vm.pop()
+			a, _ := vm.pop()
+			b, _ := vm.pop()
 			vm.push(vm.executeExponentiationOperation(b, a))
 		case code.OpMinus:
 			err := vm.push(vm.executeMinusOperator())
@@ -97,25 +103,49 @@ func (vm *VM) Run() error {
 				return err
 			}
 		case code.OpEqual, code.OpNotEqual, code.OpLessThan, code.OpGreaterThan, code.OpLessOrEqual, code.OpGreaterOrEqual:
-			vm.push(vm.executeComparisonOperation(code.Opcode(vm.instructions[ip])))
+			a, as := vm.pop()
+			b, bs := vm.pop()
+			if a == nil && b == nil {
+				switch code.Opcode(vm.instructions[ip]) {
+				case code.OpEqual:
+					vm.push(as == bs)
+				case code.OpNotEqual:
+					vm.push(as != bs)
+				case code.OpLessThan:
+					vm.push(as < bs)
+				case code.OpGreaterThan:
+					vm.push(as > bs)
+				case code.OpLessOrEqual:
+					vm.push(as <= bs)
+				case code.OpGreaterOrEqual:
+					vm.push(as >= bs)
+				}
+			} else {
+				vm.push(vm.executeComparisonOperation(a, b, code.Opcode(vm.instructions[ip])))
+			}
 		case code.OpArray:
 			numElements := int(binary.BigEndian.Uint16(vm.instructions[ip+1:]))
 			ip += 2
 			array := make([]interface{}, numElements)
 			for i := numElements - 1; i >= 0; i-- {
-				array[i] = vm.pop()
+				a, as := vm.pop()
+				if a == nil {
+					array[i] = as
+				} else {
+					array[i] = a
+				}
 			}
 			err := vm.push(array)
 			if err != nil {
 				return err
 			}
 		case code.OpIndex:
-			index := vm.pop()
-			array := vm.pop()
+			index, _ := vm.pop()
+			array, _ := vm.pop()
 			vm.executeIndexOperation(array, index)
 		case code.OpNot:
-			v := vm.pop().(bool)
-			vm.push(!v)
+			v, _ := vm.pop()
+			vm.push(!v.(bool))
 		case code.OpJumpIfTrue:
 			pos := int(binary.BigEndian.Uint16(vm.instructions[ip+1:]))
 			if vm.StackTop().(bool) {
@@ -134,33 +164,30 @@ func (vm *VM) Run() error {
 }
 
 func (vm *VM) push(value interface{}) error {
-
-	fmt.Println("stack:", vm.stack)
-	fmt.Println("stackString:", vm.stackString)
-	fmt.Println("sp:", vm.sp)
+	if vm.sp >= StackSize {
+		return fmt.Errorf("stack overflow")
+	}
 	switch value.(type) {
-	case int64, float64, nil, bool, []interface{}:
-		vm.stack = append(vm.stack, value)
+	case int, int64, float64, nil, bool, []interface{}:
+		vm.stack[vm.sp] = value
+		vm.sp++
 	case string:
-		vm.stackString = append(vm.stackString, value.(string))
+		vm.stackString[vm.sp] = value.(string)
+		vm.sp++
 	default:
 		return fmt.Errorf("unsupported type: %T", value)
 	}
-	vm.sp++
 	return nil
 }
 
-func (vm *VM) pop() interface{} {
-	if vm.sp == 0 {
-		return nil
-	}
+func (vm *VM) pop() (interface{}, string) {
+	value := vm.stack[vm.sp-1]
+	valueString := vm.stackString[vm.sp-1]
 	vm.sp--
-	if len(vm.stackString) > 0 && vm.sp < len(vm.stackString) {
-		value := vm.stackString[len(vm.stackString)-1]
-		vm.stackString = vm.stackString[:len(vm.stackString)-1]
-		return value
+	if value == nil {
+		vm.stackString[vm.sp] = ""
+		return nil, valueString
 	}
-	value := vm.stack[len(vm.stack)-1]
-	vm.stack = vm.stack[:len(vm.stack)-1]
-	return value
+	vm.stack[vm.sp] = nil
+	return value, ""
 }

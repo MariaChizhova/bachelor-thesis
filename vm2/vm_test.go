@@ -61,11 +61,11 @@ var vmTests = []vmTest{
 	{"[1, 2, 3][1]", int64(2)},
 	{"[1, 2, 3][1 + 1]", int64(3)},
 	{`["a", 2][0]`, "a"},
-	// TODO: it fails because of the problem with stacks
-	//{`[1, "a", 3 + 5, "c"][0]`, int64(1)},
-	//{`[1, "a", 3 + 5, "c"][1]`, "a"},
-	//{`[1, "a", 3 + 5, "c"][2]`, int64(8)},
-	//{`[1, "a", 3 + 5, "c"][3]`, "c"},
+	{`[2, "a"][1]`, "a"},
+	{`[1, "a", 3 + 5, "c"][0]`, int64(1)},
+	{`[1, "a", 3 + 5, "c"][1]`, "a"},
+	{`[1, "a", 3 + 5, "c"][2]`, int64(8)},
+	{`[1, "a", 3 + 5, "c"][3]`, "c"},
 	{"not true", false},
 	{"not false", true},
 	{"true or false", true},
@@ -80,7 +80,7 @@ func TestVM(t *testing.T) {
 	for _, test := range vmTests {
 		tree := parser.Parse(test.input)
 		program, err := compiler.Compile(tree)
-		print(program.Instructions.String())
+		//print(program.Instructions.String())
 		vm := New(program.Instructions, program.Constants)
 		err = vm.Run()
 		require.NoError(t, err, test.input)
