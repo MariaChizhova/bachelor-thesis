@@ -81,7 +81,7 @@ func (node *BinaryNode) Type() NodeType {
 
 type CallNode struct {
 	NodeType
-	Function  Node
+	Callee    Node
 	Arguments []Node
 }
 

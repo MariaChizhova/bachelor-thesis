@@ -7,11 +7,20 @@ import (
 	"bachelor-thesis/vm/compiler"
 	"bachelor-thesis/vm2"
 	"bachelor-thesis/vm3"
+	"strconv"
 	"testing"
 )
 
+func getSum(n int) string {
+	out := "1 "
+	for i := 2; i <= n; i++ {
+		out += " + " + strconv.Itoa(i)
+	}
+	return out
+}
+
 func Benchmark_treeTraversal(b *testing.B) {
-	tree := parser.Parse("1 + 2")
+	tree := parser.Parse(getSum(100))
 	var out interface{}
 	var err error
 	b.ResetTimer()
@@ -23,13 +32,13 @@ func Benchmark_treeTraversal(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if out.(int64) != 3 {
+	if out.(int64) != 5050 {
 		b.Fail()
 	}
 }
 
 func Benchmark_singleStack(b *testing.B) {
-	tree := parser.Parse("1 + 2")
+	tree := parser.Parse(getSum(100))
 	program, err := compiler.Compile(tree)
 	var out interface{}
 	b.ResetTimer()
@@ -43,13 +52,13 @@ func Benchmark_singleStack(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if out.(int64) != 3 {
+	if out.(int64) != 5050 {
 		b.Fail()
 	}
 }
 
 func Benchmark_multipleStacks(b *testing.B) {
-	tree := parser.Parse("1 + 2")
+	tree := parser.Parse(getSum(100))
 	program, err := compiler.Compile(tree)
 	var out interface{}
 	b.ResetTimer()
@@ -63,13 +72,13 @@ func Benchmark_multipleStacks(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if out.(int64) != 3 {
+	if out.(int64) != 5050 {
 		b.Fail()
 	}
 }
 
 func Benchmark_reflectBased(b *testing.B) {
-	tree := parser.Parse("1 + 2")
+	tree := parser.Parse(getSum(100))
 	program, err := compiler.Compile(tree)
 	var out interface{}
 	b.ResetTimer()
@@ -83,7 +92,7 @@ func Benchmark_reflectBased(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if out.(int64) != 3 {
+	if out.(int64) != 5050 {
 		b.Fail()
 	}
 }

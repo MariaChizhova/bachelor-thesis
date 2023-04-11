@@ -8,6 +8,7 @@ import (
 type Compiler struct {
 	instructions []code.Instructions
 	constants    []interface{}
+	mapEnv       bool
 }
 
 // TODO: remove it?
@@ -46,7 +47,7 @@ func (compiler *Compiler) compile(node ast.Node) {
 	case ast.NodeBinary:
 		compiler.NodeBinary(node.(*ast.BinaryNode))
 	case ast.NodeCall:
-		compiler.NodeFunction(node.(*ast.CallNode))
+		compiler.NodeCall(node.(*ast.CallNode))
 	case ast.NodeArray:
 		compiler.NodeArray(node.(*ast.ArrayNode))
 	case ast.NodeMember:
@@ -174,8 +175,13 @@ func (compiler *Compiler) NodeBinary(node *ast.BinaryNode) {
 	// compiler.emit(code.OpPop)
 }
 
-func (compiler *Compiler) NodeFunction(node *ast.CallNode) {
+func (compiler *Compiler) NodeCall(node *ast.CallNode) {
 	// TODO: implement
+	for _, arg := range node.Arguments {
+		compiler.compile(arg)
+	}
+	compiler.compile(node.Callee)
+	compiler.emit(code.OpCall, len(node.Arguments))
 }
 
 func (compiler *Compiler) NodeArray(node *ast.ArrayNode) {

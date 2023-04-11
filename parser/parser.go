@@ -169,7 +169,7 @@ func (parser *Parser) parseFunctionCall(token Token) ast.Node {
 		parser.next()
 	}
 	return &ast.CallNode{
-		Function:  &ast.IdentifierNode{Value: token.val, NodeType: ast.NodeIdentifier},
+		Callee:    &ast.IdentifierNode{Value: token.val, NodeType: ast.NodeIdentifier},
 		Arguments: arguments,
 		NodeType:  ast.NodeCall,
 	}

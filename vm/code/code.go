@@ -43,6 +43,8 @@ const (
 
 	OpGetGlobal
 	OpSetGlobal
+
+	OpCall
 )
 
 type Definition struct {
@@ -84,6 +86,8 @@ var definitions = map[Opcode]*Definition{
 
 	OpGetGlobal: {"OpGetGlobal", []int{2}},
 	OpSetGlobal: {"OpSetGlobal", []int{2}},
+
+	OpCall: {"OpCall", []int{2}},
 }
 
 func Make(op Opcode, operands ...int) Instructions {

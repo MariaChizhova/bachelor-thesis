@@ -20,7 +20,7 @@ const (
 	register
 )
 
-func Eval(input string, vmType vmType) (interface{}, error) {
+func Eval(input string, vmType vmType, env interface{}) (interface{}, error) {
 	tree := parser.Parse(input)
 	if vmType == treeTraversal {
 		evaluated, err := evaluator.Eval(tree)
