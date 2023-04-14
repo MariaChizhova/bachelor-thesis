@@ -41,9 +41,6 @@ const (
 
 	OpNot
 
-	OpGetGlobal
-	OpSetGlobal
-
 	OpCall
 )
 
@@ -83,9 +80,6 @@ var definitions = map[Opcode]*Definition{
 	OpIndex: {"OpIndex", []int{}},
 
 	OpNot: {"OpNot", []int{}},
-
-	OpGetGlobal: {"OpGetGlobal", []int{2}},
-	OpSetGlobal: {"OpSetGlobal", []int{2}},
 
 	OpCall: {"OpCall", []int{2}},
 }

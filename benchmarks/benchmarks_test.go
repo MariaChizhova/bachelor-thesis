@@ -96,3 +96,43 @@ func Benchmark_reflectBased(b *testing.B) {
 		b.Fail()
 	}
 }
+
+func Benchmark_singleStackStrings(b *testing.B) {
+	tree := parser.Parse(`"a" + "b" + "c" + "d" + "e" + "d" + "e"`)
+	program, err := compiler.Compile(tree)
+	var out interface{}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		vm := vm.New(program.Instructions, program.Constants)
+		err = vm.Run()
+		out = vm.StackTop()
+	}
+	b.StopTimer()
+
+	if err != nil {
+		b.Fatal(err)
+	}
+	if out.(string) != "abcdede" {
+		b.Fail()
+	}
+}
+
+func Benchmark_multipleStacksStrings(b *testing.B) {
+	tree := parser.Parse(`"a" + "b" + "c" + "d" + "e" + "d" + "e"`)
+	program, err := compiler.Compile(tree)
+	var out interface{}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		vm := vm2.New(program.Instructions, program.Constants)
+		err = vm.Run()
+		out = vm.StackTop()
+	}
+	b.StopTimer()
+
+	if err != nil {
+		b.Fatal(err)
+	}
+	if out.(string) != "abcdede" {
+		b.Fail()
+	}
+}
