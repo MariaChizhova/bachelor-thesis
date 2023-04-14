@@ -7,6 +7,7 @@ import (
 	"bachelor-thesis/vm/compiler"
 	"bachelor-thesis/vm2"
 	"bachelor-thesis/vm3"
+	"bachelor-thesis/vm4"
 	"strconv"
 	"testing"
 )
@@ -20,7 +21,7 @@ func getSum(n int) string {
 }
 
 func Benchmark_treeTraversal(b *testing.B) {
-	tree := parser.Parse(getSum(100))
+	tree := parser.Parse(getSum(5))
 	var out interface{}
 	var err error
 	b.ResetTimer()
@@ -32,13 +33,13 @@ func Benchmark_treeTraversal(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if out.(int64) != 5050 {
+	if out.(int64) != 15 {
 		b.Fail()
 	}
 }
 
 func Benchmark_singleStack(b *testing.B) {
-	tree := parser.Parse(getSum(100))
+	tree := parser.Parse(getSum(5))
 	program, err := compiler.Compile(tree)
 	var out interface{}
 	b.ResetTimer()
@@ -52,13 +53,13 @@ func Benchmark_singleStack(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if out.(int64) != 5050 {
+	if out.(int64) != 15 {
 		b.Fail()
 	}
 }
 
 func Benchmark_multipleStacks(b *testing.B) {
-	tree := parser.Parse(getSum(100))
+	tree := parser.Parse(getSum(5))
 	program, err := compiler.Compile(tree)
 	var out interface{}
 	b.ResetTimer()
@@ -72,13 +73,13 @@ func Benchmark_multipleStacks(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if out.(int64) != 5050 {
+	if out.(int64) != 15 {
 		b.Fail()
 	}
 }
 
 func Benchmark_reflectBased(b *testing.B) {
-	tree := parser.Parse(getSum(100))
+	tree := parser.Parse(getSum(5))
 	program, err := compiler.Compile(tree)
 	var out interface{}
 	b.ResetTimer()
@@ -92,7 +93,33 @@ func Benchmark_reflectBased(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if out.(int64) != 5050 {
+	if out.(int64) != 15 {
+		b.Fail()
+	}
+}
+
+func Benchmark_registerBased(b *testing.B) {
+	program := []int64{
+		vm4.OpConstant, vm4.R0, 1,
+		vm4.OpConstant, vm4.R1, 2,
+		vm4.OpAdd, vm4.R0, vm4.R1,
+		vm4.OpConstant, vm4.R1, 3,
+		vm4.OpAdd, vm4.R0, vm4.R1,
+		vm4.OpConstant, vm4.R1, 4,
+		vm4.OpAdd, vm4.R0, vm4.R1,
+		vm4.OpConstant, vm4.R1, 5,
+		vm4.OpAdd, vm4.R0, vm4.R1,
+		vm4.OpPrint, vm4.R0,
+		vm4.OpHalt}
+	var out interface{}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		vm := vm4.New(program)
+		vm.Run()
+		out = vm.GetResult()
+	}
+	b.StopTimer()
+	if out.(int64) != 15 {
 		b.Fail()
 	}
 }
