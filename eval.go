@@ -23,7 +23,7 @@ const (
 func Eval(input string, vmType vmType, env interface{}) (interface{}, error) {
 	tree := parser.Parse(input)
 	if vmType == treeTraversal {
-		evaluated, err := evaluator.Eval(tree)
+		evaluated, err := evaluator.Eval(tree, env)
 		if err != nil {
 			return nil, err
 		}
@@ -35,21 +35,21 @@ func Eval(input string, vmType vmType, env interface{}) (interface{}, error) {
 		}
 		if vmType == singleStack {
 			vm := vm.New(program.Instructions, program.Constants)
-			err = vm.Run()
+			err = vm.Run(env)
 			if err != nil {
 				return nil, err
 			}
 			return vm.StackTop(), nil
 		} else if vmType == multipleStacks {
 			vm := vm2.New(program.Instructions, program.Constants)
-			err = vm.Run()
+			err = vm.Run(env)
 			if err != nil {
 				return nil, err
 			}
 			return vm.StackTop(), nil
 		} else if vmType == reflectBased {
 			vm := vm3.New(program.Instructions, program.Constants)
-			err = vm.Run()
+			err = vm.Run(env)
 			if err != nil {
 				return nil, err
 			}

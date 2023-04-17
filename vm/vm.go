@@ -186,28 +186,3 @@ func (vm *VM) pop() interface{} {
 	vm.sp--
 	return value
 }
-
-func Fetch(from, i interface{}) interface{} {
-	v := reflect.ValueOf(from)
-	kind := v.Kind()
-	if kind == reflect.Invalid {
-		panic(fmt.Sprintf("cannot fetch %v from %T", i, from))
-	}
-
-	if kind == reflect.Ptr {
-		v = reflect.Indirect(v)
-		kind = v.Kind()
-	}
-
-	switch kind {
-	case reflect.Map:
-		value := v.MapIndex(reflect.ValueOf(i))
-		if value.IsValid() {
-			return value.Interface()
-		} else {
-			elem := reflect.TypeOf(from).Elem()
-			return reflect.Zero(elem).Interface()
-		}
-	}
-	panic(fmt.Sprintf("cannot fetch %v from %T", i, from))
-}

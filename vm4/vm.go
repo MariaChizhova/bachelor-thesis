@@ -161,8 +161,9 @@ func (vm *VM) Run() error {
 				vm.registers[reg1] = 0
 			}
 		case OpPrint:
-			reg := uint(vm.NextCode())
-			fmt.Println("Result: ", vm.registers[reg])
+			vm.NextCode()
+			//reg := uint(vm.NextCode())
+			//fmt.Println("Result: ", vm.registers[reg])
 		case OpHalt:
 			return nil
 		default:
