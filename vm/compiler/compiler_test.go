@@ -231,7 +231,9 @@ var compilerTests = []compilerTest{
 	{
 		`foo()`,
 		Program{
+			Constants: []interface{}{"foo"},
 			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpLoadConst, 0),
 				code.Make(code.OpCall, 0),
 			}),
 		},
@@ -239,8 +241,11 @@ var compilerTests = []compilerTest{
 	{
 		`foo(bar())`,
 		Program{
+			Constants: []interface{}{"bar", "foo"},
 			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpLoadConst, 0),
 				code.Make(code.OpCall, 0),
+				code.Make(code.OpLoadConst, 1),
 				code.Make(code.OpCall, 1),
 			}),
 		},
@@ -248,11 +253,12 @@ var compilerTests = []compilerTest{
 	{
 		`foo("arg1", 2, true)`,
 		Program{
-			Constants: []interface{}{"arg1", int64(2)},
+			Constants: []interface{}{"arg1", int64(2), "foo"},
 			Instructions: concatInstructions([]code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
 				code.Make(code.OpTrue),
+				code.Make(code.OpLoadConst, 2),
 				code.Make(code.OpCall, 3),
 			}),
 		},
@@ -263,7 +269,7 @@ func TestCompiler(t *testing.T) {
 	for _, test := range compilerTests {
 		tree := parser.Parse(test.input)
 		program, err := Compile(tree)
-		print(program.Instructions.String())
+		// print(program.Instructions.String())
 		require.NoError(t, err, test.input)
 		assert.Equal(t, test.program.Instructions, program.Instructions)
 		assert.Equal(t, test.program.Constants, program.Constants)

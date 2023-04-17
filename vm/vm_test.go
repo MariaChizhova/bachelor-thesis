@@ -78,9 +78,9 @@ func TestVM(t *testing.T) {
 		program, err := compiler.Compile(tree)
 		// print(program.Instructions.String())
 		vm := New(program.Instructions, program.Constants)
-		err = vm.Run()
+		err = vm.Run(nil)
 		require.NoError(t, err, test.input)
-		stackElem := vm.StackTop() // vm.LastPoppedStackElem()
+		stackElem := vm.StackTop()
 		testExpectedObject(t, test.expected, stackElem)
 	}
 }
@@ -93,5 +93,35 @@ func testExpectedObject(
 	switch expected := expected.(type) {
 	case bool, int64, float64, nil, string, []interface{}:
 		assert.Equal(t, expected, actual)
+	}
+}
+
+type vmTestWithEnvironment struct {
+	input    string
+	env      interface{}
+	expected interface{}
+}
+
+var vmTestsWithEnvironment = []vmTestWithEnvironment{
+	{`foo("world")`,
+		map[string]interface{}{"foo": func(input string) string { return "hello " + input }},
+		"hello world",
+	},
+	{`add(1, 2)`,
+		map[string]interface{}{"add": func(a, b int64) int64 { return a + b }},
+		int64(3),
+	},
+}
+
+func TestVMWithEnvironment(t *testing.T) {
+	for _, test := range vmTestsWithEnvironment {
+		tree := parser.Parse(test.input)
+		program, err := compiler.Compile(tree)
+		//print(program.Instructions.String())
+		vm := New(program.Instructions, program.Constants)
+		err = vm.Run(test.env)
+		require.NoError(t, err, test.input)
+		stackElem := vm.StackTop()
+		testExpectedObject(t, test.expected, stackElem)
 	}
 }

@@ -65,6 +65,7 @@ func (compiler *Compiler) NodeNumber(node *ast.NumberNode) {
 
 func (compiler *Compiler) NodeIdentifier(node *ast.IdentifierNode) {
 	// TODO: implement
+	compiler.emit(code.OpLoadConst, compiler.addConstant(node.Value))
 }
 
 func (compiler *Compiler) NodeString(node *ast.StringNode) {

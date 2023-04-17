@@ -90,6 +90,10 @@ var evaluatorTestsWithEnvironment = []evaluatorTestWithEnvironment{
 		map[string]interface{}{"foo": func(input string) string { return "hello " + input }},
 		"hello world",
 	},
+	{`add(1, 2)`,
+		map[string]interface{}{"add": func(a, b int64) int64 { return a + b }},
+		int64(3),
+	},
 }
 
 func TestEvaluatorWithEnvironment(t *testing.T) {

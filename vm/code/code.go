@@ -42,6 +42,7 @@ const (
 	OpNot
 
 	OpCall
+	OpLoadConst
 )
 
 type Definition struct {
@@ -81,7 +82,8 @@ var definitions = map[Opcode]*Definition{
 
 	OpNot: {"OpNot", []int{}},
 
-	OpCall: {"OpCall", []int{2}},
+	OpCall:      {"OpCall", []int{2}},
+	OpLoadConst: {"OpConstant", []int{2}},
 }
 
 func Make(op Opcode, operands ...int) Instructions {
