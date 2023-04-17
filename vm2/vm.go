@@ -7,8 +7,6 @@ import (
 	"reflect"
 )
 
-const StackSize = 2048
-
 type VM struct {
 	constants    []interface{}
 	instructions code.Instructions
@@ -21,20 +19,17 @@ func New(instructions code.Instructions, constants []interface{}) *VM {
 	return &VM{
 		instructions: instructions,
 		constants:    constants,
-		stack:        make([]interface{}, StackSize),
-		stackString:  make([]string, StackSize),
+		stack:        make([]interface{}, 0),
+		stackString:  make([]string, 0),
 		sp:           0,
 	}
 }
 
 func (vm *VM) StackTop() interface{} {
-	if vm.sp == 0 {
-		return nil
-	}
-	if vm.stack[vm.sp-1] != nil {
-		return vm.stack[vm.sp-1]
-	} else if vm.stackString[vm.sp-1] != "" {
-		return vm.stackString[vm.sp-1]
+	if vm.stack[len(vm.stack)-1] != nil {
+		return vm.stack[len(vm.stack)-1]
+	} else if vm.stackString[len(vm.stackString)-1] != "" {
+		return vm.stackString[len(vm.stackString)-1]
 	} else {
 		return nil
 	}
@@ -211,28 +206,24 @@ func (vm *VM) Run(env interface{}) error {
 }
 
 func (vm *VM) push(value interface{}) error {
-	if vm.sp >= StackSize {
-		return fmt.Errorf("stack overflow")
-	}
 	switch value.(type) {
 	case string:
-		vm.stackString[vm.sp] = value.(string)
-		vm.sp++
+		vm.stackString = append(vm.stackString, value.(string))
+		vm.stack = append(vm.stack, nil)
 	default:
-		vm.stack[vm.sp] = value
-		vm.sp++
+		vm.stack = append(vm.stack, value)
+		vm.stackString = append(vm.stackString, "")
 	}
 	return nil
 }
 
 func (vm *VM) pop() (interface{}, string) {
-	value := vm.stack[vm.sp-1]
-	valueString := vm.stackString[vm.sp-1]
-	vm.sp--
+	value := vm.stack[len(vm.stack)-1]
+	valueString := vm.stackString[len(vm.stackString)-1]
+	vm.stackString = vm.stackString[:len(vm.stackString)-1]
+	vm.stack = vm.stack[:len(vm.stack)-1]
 	if value == nil {
-		vm.stackString[vm.sp] = ""
 		return nil, valueString
 	}
-	vm.stack[vm.sp] = nil
 	return value, ""
 }

@@ -7,8 +7,6 @@ import (
 	"reflect"
 )
 
-const StackSize = 2048
-
 type VM struct {
 	constants    []interface{}
 	instructions code.Instructions
@@ -20,16 +18,13 @@ func New(instructions code.Instructions, constants []interface{}) *VM {
 	return &VM{
 		instructions: instructions,
 		constants:    constants,
-		stack:        make([]reflect.Value, StackSize),
+		stack:        make([]reflect.Value, 0),
 		sp:           0,
 	}
 }
 
 func (vm *VM) StackTop() interface{} {
-	if vm.sp == 0 {
-		return nil
-	}
-	return vm.stack[vm.sp-1].Interface()
+	return vm.stack[len(vm.stack)-1].Interface()
 }
 
 func (vm *VM) Run(env interface{}) error {
@@ -163,17 +158,12 @@ func (vm *VM) Run(env interface{}) error {
 }
 
 func (vm *VM) push(value reflect.Value) error {
-	if vm.sp >= StackSize {
-		return fmt.Errorf("stack overflow")
-	}
-
-	vm.stack[vm.sp] = value
-	vm.sp++
+	vm.stack = append(vm.stack, value)
 	return nil
 }
 
 func (vm *VM) pop() reflect.Value {
-	value := vm.stack[vm.sp-1]
-	vm.sp--
+	value := vm.stack[len(vm.stack)-1]
+	vm.stack = vm.stack[:len(vm.stack)-1]
 	return value
 }
