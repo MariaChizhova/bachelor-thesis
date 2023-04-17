@@ -206,26 +206,26 @@ func Benchmark_singleStackCalls(b *testing.B) {
 	}
 }
 
-//func Benchmark_multipleStacksCalls(b *testing.B) {
-//	env := map[string]interface{}{"add": func(a, b int64) int64 { return a + b }}
-//	tree := parser.Parse("add(1, 2)")
-//	program, err := compiler.Compile(tree)
-//	var out interface{}
-//	b.ResetTimer()
-//	for n := 0; n < b.N; n++ {
-//		vm := vm2.New(program.Instructions, program.Constants)
-//		err = vm.Run(env)
-//		out = vm.StackTop()
-//	}
-//	b.StopTimer()
-//
-//	if err != nil {
-//		b.Fatal(err)
-//	}
-//	if out.(int64) != 3 {
-//		b.Fail()
-//	}
-//}
+func Benchmark_multipleStacksCalls(b *testing.B) {
+	env := map[string]interface{}{"add": func(a, b int64) int64 { return a + b }}
+	tree := parser.Parse("add(1, 2)")
+	program, err := compiler.Compile(tree)
+	var out interface{}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		vm := vm2.New(program.Instructions, program.Constants)
+		err = vm.Run(env)
+		out = vm.StackTop()
+	}
+	b.StopTimer()
+
+	if err != nil {
+		b.Fatal(err)
+	}
+	if out.(int64) != 3 {
+		b.Fail()
+	}
+}
 
 func Benchmark_reflectBasedCalls(b *testing.B) {
 	env := map[string]interface{}{"add": func(a, b int64) int64 { return a + b }}
