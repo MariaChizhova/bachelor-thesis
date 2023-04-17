@@ -73,7 +73,29 @@ var evaluatorTests = []evaluatorTest{
 func TestEvaluator(t *testing.T) {
 	for _, test := range evaluatorTests {
 		tree := parser.Parse(test.input)
-		evaluated, err := Eval(tree)
+		evaluated, err := Eval(tree, nil)
+		require.NoError(t, err, test.input)
+		assert.Equal(t, test.expected, evaluated)
+	}
+}
+
+type evaluatorTestWithEnvironment struct {
+	input    string
+	env      interface{}
+	expected interface{}
+}
+
+var evaluatorTestsWithEnvironment = []evaluatorTestWithEnvironment{
+	{`foo("world")`,
+		map[string]interface{}{"foo": func(input string) string { return "hello " + input }},
+		"hello world",
+	},
+}
+
+func TestEvaluatorWithEnvironment(t *testing.T) {
+	for _, test := range evaluatorTestsWithEnvironment {
+		tree := parser.Parse(test.input)
+		evaluated, err := Eval(tree, test.env)
 		require.NoError(t, err, test.input)
 		assert.Equal(t, test.expected, evaluated)
 	}

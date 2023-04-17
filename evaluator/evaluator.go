@@ -4,9 +4,10 @@ import (
 	"bachelor-thesis/parser/ast"
 	"fmt"
 	"math"
+	"reflect"
 )
 
-func Eval(node ast.Node) (interface{}, error) {
+func Eval(node ast.Node, env interface{}) (interface{}, error) {
 	switch node.Type() {
 	case ast.NodeNumber:
 		return EvalNumber(node)
@@ -19,15 +20,15 @@ func Eval(node ast.Node) (interface{}, error) {
 	case ast.NodeNil:
 		return nil, nil
 	case ast.NodeUnary:
-		return EvalUnary(node)
+		return EvalUnary(node, env)
 	case ast.NodeBinary:
-		return EvalBinary(node)
+		return EvalBinary(node, env)
 	case ast.NodeCall:
-		return EvalFunctionCall(node)
+		return EvalFunctionCall(node, env)
 	case ast.NodeArray:
-		return EvalArray(node)
+		return EvalArray(node, env)
 	case ast.NodeMember:
-		return EvalIndex(node)
+		return EvalIndex(node, env)
 	}
 	return nil, nil
 }
@@ -41,8 +42,8 @@ func EvalNumber(node ast.Node) (interface{}, error) {
 	return nil, nil
 }
 
-func EvalUnary(node ast.Node) (interface{}, error) {
-	value, err := Eval(node.(*ast.UnaryNode).Node)
+func EvalUnary(node ast.Node, env interface{}) (interface{}, error) {
+	value, err := Eval(node.(*ast.UnaryNode).Node, env)
 	if err != nil {
 		return nil, err
 	}
@@ -71,12 +72,12 @@ func EvalUnary(node ast.Node) (interface{}, error) {
 	return nil, fmt.Errorf("undefined unary %q operator", node.(*ast.UnaryNode).Operator)
 }
 
-func EvalBinary(node ast.Node) (interface{}, error) {
-	left, err := Eval(node.(*ast.BinaryNode).Left)
+func EvalBinary(node ast.Node, env interface{}) (interface{}, error) {
+	left, err := Eval(node.(*ast.BinaryNode).Left, env)
 	if err != nil {
 		return nil, err
 	}
-	right, err := Eval(node.(*ast.BinaryNode).Right)
+	right, err := Eval(node.(*ast.BinaryNode).Right, env)
 	if err != nil {
 		return nil, err
 	}
@@ -329,10 +330,10 @@ func EvalBinary(node ast.Node) (interface{}, error) {
 	return nil, fmt.Errorf("undefined binary %q operator", node.(*ast.BinaryNode).Operator)
 }
 
-func EvalArray(node ast.Node) (interface{}, error) {
+func EvalArray(node ast.Node, env interface{}) (interface{}, error) {
 	array := make([]interface{}, 0)
 	for _, node := range node.(*ast.ArrayNode).Nodes {
-		value, err := Eval(node)
+		value, err := Eval(node, env)
 		if err != nil {
 			return nil, err
 		}
@@ -341,12 +342,12 @@ func EvalArray(node ast.Node) (interface{}, error) {
 	return array, nil
 }
 
-func EvalIndex(node ast.Node) (interface{}, error) {
-	array, err := Eval(node.(*ast.MemberNode).Node)
+func EvalIndex(node ast.Node, env interface{}) (interface{}, error) {
+	array, err := Eval(node.(*ast.MemberNode).Node, env)
 	if err != nil {
 		return array, err
 	}
-	index, err := Eval(node.(*ast.MemberNode).Property)
+	index, err := Eval(node.(*ast.MemberNode).Property, env)
 	if err != nil {
 		return index, err
 	}
@@ -363,6 +364,61 @@ func EvalIndex(node ast.Node) (interface{}, error) {
 	return nil, nil
 }
 
-func EvalFunctionCall(node ast.Node) (interface{}, error) {
+func EvalFunctionCall(node ast.Node, env interface{}) (interface{}, error) {
+	node = node.(*ast.CallNode)
+	name := node.(*ast.CallNode).Callee.(*ast.IdentifierNode).Value
+	fn, ok := getFunc(env, name)
+	if !ok {
+		return nil, fmt.Errorf("undefined: %v", name)
+	}
+
+	in := make([]reflect.Value, 0)
+
+	for _, a := range node.(*ast.CallNode).Arguments {
+		i, err := Eval(a, env)
+		if err != nil {
+			return nil, err
+		}
+		in = append(in, reflect.ValueOf(i))
+	}
+
+	out := reflect.ValueOf(fn).Call(in)
+
+	if len(out) == 0 {
+		return nil, nil
+	} else if len(out) > 1 {
+		return nil, fmt.Errorf("func %q must return only one value", name)
+	}
+
+	if out[0].IsValid() && out[0].CanInterface() {
+		return out[0].Interface(), nil
+	}
 	return nil, nil
+}
+
+func getFunc(val interface{}, i interface{}) (interface{}, bool) {
+	v := reflect.ValueOf(val)
+	d := v
+	if v.Kind() == reflect.Ptr {
+		d = v.Elem()
+	}
+
+	switch d.Kind() {
+	case reflect.Map:
+		value := d.MapIndex(reflect.ValueOf(i))
+		if value.IsValid() && value.CanInterface() {
+			return value.Interface(), true
+		}
+	case reflect.Struct:
+		name := reflect.ValueOf(i).String()
+		method := v.MethodByName(name)
+		if method.IsValid() && method.CanInterface() {
+			return method.Interface(), true
+		}
+		value := d.FieldByName(name)
+		if value.IsValid() && value.CanInterface() {
+			return value.Interface(), true
+		}
+	}
+	return nil, false
 }
