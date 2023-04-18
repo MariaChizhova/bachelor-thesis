@@ -115,6 +115,18 @@ var vmTestsWithEnvironment = []vmTestWithEnvironment{
 		map[string]interface{}{"add": func(a, b int64) int64 { return a + b }},
 		int64(3),
 	},
+	{`a + b`,
+		map[string]interface{}{"a": 1.2, "b": 2.3},
+		3.5,
+	},
+	{`a and b and not c`,
+		map[string]interface{}{"a": false, "b": true, "c": false},
+		false,
+	},
+	{`a + b + add(1, 2)`,
+		map[string]interface{}{"a": 1.2, "b": 2.3, "add": func(a, b int64) int64 { return a + b }},
+		6.5,
+	},
 }
 
 func TestVMWithEnvironment(t *testing.T) {

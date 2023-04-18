@@ -44,27 +44,15 @@ func (vm *VM) Run(env interface{}) error {
 			if int(constIndex) >= len(vm.constants) {
 				return fmt.Errorf("constant index out of range: %d", constIndex)
 			}
-			err := vm.push(vm.constants[constIndex])
-			if err != nil {
-				return err
-			}
+			vm.push(vm.constants[constIndex])
 		case code.OpPop:
 			vm.pop()
 		case code.OpTrue:
-			err := vm.push(true)
-			if err != nil {
-				return err
-			}
+			vm.push(true)
 		case code.OpFalse:
-			err := vm.push(false)
-			if err != nil {
-				return err
-			}
+			vm.push(false)
 		case code.OpNil:
-			err := vm.push(nil)
-			if err != nil {
-				return err
-			}
+			vm.push(nil)
 		case code.OpAdd:
 			a, as := vm.pop()
 			b, bs := vm.pop()
@@ -94,10 +82,7 @@ func (vm *VM) Run(env interface{}) error {
 			b, _ := vm.pop()
 			vm.push(vm.executeExponentiationOperation(b, a))
 		case code.OpMinus:
-			err := vm.push(vm.executeMinusOperator())
-			if err != nil {
-				return err
-			}
+			vm.push(vm.executeMinusOperator())
 		case code.OpEqual, code.OpNotEqual, code.OpLessThan, code.OpGreaterThan, code.OpLessOrEqual, code.OpGreaterOrEqual:
 			a, as := vm.pop()
 			b, bs := vm.pop()
@@ -131,10 +116,7 @@ func (vm *VM) Run(env interface{}) error {
 					array[i] = a
 				}
 			}
-			err := vm.push(array)
-			if err != nil {
-				return err
-			}
+			vm.push(array)
 		case code.OpIndex:
 			index, _ := vm.pop()
 			array, _ := vm.pop()
@@ -205,7 +187,7 @@ func (vm *VM) Run(env interface{}) error {
 	return nil
 }
 
-func (vm *VM) push(value interface{}) error {
+func (vm *VM) push(value interface{}) {
 	switch value.(type) {
 	case string:
 		vm.stackString = append(vm.stackString, value.(string))
@@ -214,7 +196,6 @@ func (vm *VM) push(value interface{}) error {
 		vm.stack = append(vm.stack, value)
 		vm.stackString = append(vm.stackString, "")
 	}
-	return nil
 }
 
 func (vm *VM) pop() (interface{}, string) {

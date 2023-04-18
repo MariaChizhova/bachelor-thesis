@@ -261,16 +261,17 @@ func (vm *VM) executeComparisonOperation(opcode code.Opcode) interface{} {
 	panic(fmt.Sprintf("invalid operation: %T comparison %T", a, b))
 }
 
-func (vm *VM) executeIndexOperation(array interface{}, index interface{}) interface{} {
+func (vm *VM) executeIndexOperation(array interface{}, index interface{}) {
 	arrayObject := array.([]interface{})
 	i := index.(int64)
 	max := int64(len(arrayObject) - 1)
 	if i < 0 || i > max {
-		return vm.push(nil)
+		vm.push(nil)
+		return
 	}
 	switch t := arrayObject[i].(type) {
 	case int64, float64, bool, string:
-		return vm.push(t)
+		vm.push(t)
+		return
 	}
-	return vm.push(nil)
 }

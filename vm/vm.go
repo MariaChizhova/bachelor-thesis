@@ -37,27 +37,15 @@ func (vm *VM) Run(env interface{}) error {
 		case code.OpConstant:
 			constIndex := binary.BigEndian.Uint16(vm.instructions[ip+1:])
 			ip += 2
-			err := vm.push(vm.constants[constIndex])
-			if err != nil {
-				return err
-			}
+			vm.push(vm.constants[constIndex])
 		case code.OpPop:
 			vm.pop()
 		case code.OpTrue:
-			err := vm.push(true)
-			if err != nil {
-				return err
-			}
+			vm.push(true)
 		case code.OpFalse:
-			err := vm.push(false)
-			if err != nil {
-				return err
-			}
+			vm.push(false)
 		case code.OpNil:
-			err := vm.push(nil)
-			if err != nil {
-				return err
-			}
+			vm.push(nil)
 		case code.OpAdd:
 			a := vm.pop()
 			b := vm.pop()
@@ -83,10 +71,7 @@ func (vm *VM) Run(env interface{}) error {
 			b := vm.pop()
 			vm.push(vm.executeExponentiationOperation(b, a))
 		case code.OpMinus:
-			err := vm.push(vm.executeMinusOperator())
-			if err != nil {
-				return err
-			}
+			vm.push(vm.executeMinusOperator())
 		case code.OpEqual, code.OpNotEqual, code.OpLessThan, code.OpGreaterThan, code.OpLessOrEqual, code.OpGreaterOrEqual:
 			vm.push(vm.executeComparisonOperation(code.Opcode(vm.instructions[ip])))
 		case code.OpArray:
@@ -96,10 +81,7 @@ func (vm *VM) Run(env interface{}) error {
 			for i := numElements - 1; i >= 0; i-- {
 				array[i] = vm.pop()
 			}
-			err := vm.push(array)
-			if err != nil {
-				return err
-			}
+			vm.push(array)
 		case code.OpIndex:
 			index := vm.pop()
 			array := vm.pop()
@@ -166,9 +148,8 @@ func (vm *VM) Run(env interface{}) error {
 	return nil
 }
 
-func (vm *VM) push(value interface{}) error {
+func (vm *VM) push(value interface{}) {
 	vm.stack = append(vm.stack, value)
-	return nil
 }
 
 func (vm *VM) pop() interface{} {

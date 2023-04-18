@@ -262,16 +262,17 @@ func (vm *VM) executeComparisonOperation(a, b reflect.Value, opcode code.Opcode)
 	panic(fmt.Sprintf("invalid operation: %T comparison %T", a, b))
 }
 
-func (vm *VM) executeIndexOperation(array reflect.Value, index reflect.Value) error {
+func (vm *VM) executeIndexOperation(array reflect.Value, index reflect.Value) {
 	arrayObject := array.Interface().([]interface{})
 	i := index.Int()
 	max := int64(len(arrayObject) - 1)
 	if i < 0 || i > max {
-		return vm.push(reflect.ValueOf(nil))
+		vm.push(reflect.ValueOf(nil))
+		return
 	}
 	switch arrayObject[i].(type) {
 	case int, int64, float64, bool, string:
-		return vm.push(reflect.ValueOf(arrayObject[i]))
+		vm.push(reflect.ValueOf(arrayObject[i]))
+		return
 	}
-	return vm.push(reflect.ValueOf(nil))
 }
