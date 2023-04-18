@@ -65,6 +65,7 @@ func (vm *VM) PrintRuntimeInfo() {
 }
 
 func (vm *VM) Run() error {
+	vm.ip = -1
 	for {
 		instr := vm.NextCode()
 		switch instr {

@@ -42,13 +42,13 @@ func Benchmark_singleStack(b *testing.B) {
 	tree := parser.Parse(getSum(5))
 	program, err := compiler.Compile(tree)
 	var out interface{}
+	vm := vm.New(program.Instructions, program.Constants)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm.New(program.Instructions, program.Constants)
 		err = vm.Run(nil)
-		out = vm.StackTop()
 	}
 	b.StopTimer()
+	out = vm.StackTop()
 
 	if err != nil {
 		b.Fatal(err)
@@ -62,13 +62,13 @@ func Benchmark_multipleStacks(b *testing.B) {
 	tree := parser.Parse(getSum(5))
 	program, err := compiler.Compile(tree)
 	var out interface{}
+	vm := vm2.New(program.Instructions, program.Constants)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm2.New(program.Instructions, program.Constants)
 		err = vm.Run(nil)
-		out = vm.StackTop()
 	}
 	b.StopTimer()
+	out = vm.StackTop()
 
 	if err != nil {
 		b.Fatal(err)
@@ -82,13 +82,13 @@ func Benchmark_reflectBased(b *testing.B) {
 	tree := parser.Parse(getSum(5))
 	program, err := compiler.Compile(tree)
 	var out interface{}
+	vm := vm3.New(program.Instructions, program.Constants)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm3.New(program.Instructions, program.Constants)
 		err = vm.Run(nil)
-		out = vm.StackTop()
 	}
 	b.StopTimer()
+	out = vm.StackTop()
 
 	if err != nil {
 		b.Fatal(err)
@@ -112,13 +112,13 @@ func Benchmark_registerBased(b *testing.B) {
 		vm4.OpPrint, vm4.R0,
 		vm4.OpHalt}
 	var out interface{}
+	vm := vm4.New(program)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm4.New(program)
 		vm.Run()
-		out = vm.GetResult()
 	}
 	b.StopTimer()
+	out = vm.GetResult()
 	if out.(int64) != 15 {
 		b.Fail()
 	}
@@ -129,13 +129,13 @@ func Benchmark_singleStackStrings(b *testing.B) {
 	tree := parser.Parse(`"a" + "b" + "c" + "d" + "e" + "d" + "e"`)
 	program, err := compiler.Compile(tree)
 	var out interface{}
+	vm := vm.New(program.Instructions, program.Constants)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm.New(program.Instructions, program.Constants)
 		err = vm.Run(nil)
-		out = vm.StackTop()
 	}
 	b.StopTimer()
+	out = vm.StackTop()
 
 	if err != nil {
 		b.Fatal(err)
@@ -149,14 +149,14 @@ func Benchmark_multipleStacksStrings(b *testing.B) {
 	tree := parser.Parse(`"a" + "b" + "c" + "d" + "e" + "d" + "e"`)
 	program, err := compiler.Compile(tree)
 	var out interface{}
+
+	vm := vm2.New(program.Instructions, program.Constants)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm2.New(program.Instructions, program.Constants)
 		err = vm.Run(nil)
-		out = vm.StackTop()
 	}
 	b.StopTimer()
-
+	out = vm.StackTop()
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -190,13 +190,13 @@ func Benchmark_singleStackCalls(b *testing.B) {
 	tree := parser.Parse("add(1, 2)")
 	program, err := compiler.Compile(tree)
 	var out interface{}
+	vm := vm.New(program.Instructions, program.Constants)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm.New(program.Instructions, program.Constants)
 		err = vm.Run(env)
-		out = vm.StackTop()
 	}
 	b.StopTimer()
+	out = vm.StackTop()
 
 	if err != nil {
 		b.Fatal(err)
@@ -211,13 +211,13 @@ func Benchmark_multipleStacksCalls(b *testing.B) {
 	tree := parser.Parse("add(1, 2)")
 	program, err := compiler.Compile(tree)
 	var out interface{}
+	vm := vm2.New(program.Instructions, program.Constants)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm2.New(program.Instructions, program.Constants)
 		err = vm.Run(env)
-		out = vm.StackTop()
 	}
 	b.StopTimer()
+	out = vm.StackTop()
 
 	if err != nil {
 		b.Fatal(err)
@@ -232,13 +232,13 @@ func Benchmark_reflectBasedCalls(b *testing.B) {
 	tree := parser.Parse("add(1, 2)")
 	program, err := compiler.Compile(tree)
 	var out interface{}
+	vm := vm3.New(program.Instructions, program.Constants)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		vm := vm3.New(program.Instructions, program.Constants)
 		err = vm.Run(env)
-		out = vm.StackTop()
 	}
 	b.StopTimer()
+	out = vm.StackTop()
 
 	if err != nil {
 		b.Fatal(err)
