@@ -28,11 +28,17 @@ func (vm *VM) StackTop() interface{} {
 }
 
 func (vm *VM) Run(env interface{}) error {
-	for ip := 0; ip < len(vm.instructions); ip++ {
-		switch code.Opcode(vm.instructions[ip]) {
+	if vm.stack == nil {
+		vm.stack = make([]reflect.Value, 0, 2)
+	} else {
+		vm.stack = vm.stack[0:0]
+	}
+	vm.sp = 0
+	for vm.sp < len(vm.instructions) {
+		switch code.Opcode(vm.instructions[vm.sp]) {
 		case code.OpConstant:
-			constIndex := binary.BigEndian.Uint16(vm.instructions[ip+1:])
-			ip += 2
+			constIndex := binary.BigEndian.Uint16(vm.instructions[vm.sp+1:])
+			vm.sp += 2
 			vm.push(reflect.ValueOf(vm.constants[constIndex]))
 		case code.OpPop:
 			vm.pop()
@@ -72,10 +78,10 @@ func (vm *VM) Run(env interface{}) error {
 		case code.OpEqual, code.OpNotEqual, code.OpLessThan, code.OpGreaterThan, code.OpLessOrEqual, code.OpGreaterOrEqual:
 			a := vm.pop()
 			b := vm.pop()
-			vm.push(vm.executeComparisonOperation(b, a, code.Opcode(vm.instructions[ip])))
+			vm.push(vm.executeComparisonOperation(b, a, code.Opcode(vm.instructions[vm.sp])))
 		case code.OpArray:
-			numElements := int(binary.BigEndian.Uint16(vm.instructions[ip+1:]))
-			ip += 2
+			numElements := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
+			vm.sp += 2
 			array := make([]interface{}, numElements)
 			for i := numElements - 1; i >= 0; i-- {
 				array[i] = vm.pop().Interface()
@@ -89,19 +95,19 @@ func (vm *VM) Run(env interface{}) error {
 			v := vm.pop()
 			vm.push(reflect.ValueOf(!v.Bool()))
 		case code.OpJumpIfTrue:
-			pos := int(binary.BigEndian.Uint16(vm.instructions[ip+1:]))
+			pos := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
 			if vm.StackTop().(bool) {
-				ip = pos - 1
+				vm.sp = pos - 1
 			}
 		case code.OpJumpIfFalse:
-			pos := int(binary.BigEndian.Uint16(vm.instructions[ip+1:]))
+			pos := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
 			if !vm.StackTop().(bool) {
-				ip = pos - 1
+				vm.sp = pos - 1
 			}
 		case code.OpCall:
 			fn := vm.pop()
-			size := int(binary.BigEndian.Uint16(vm.instructions[ip+1:]))
-			ip += 2
+			size := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
+			vm.sp += 2
 			in := make([]reflect.Value, size)
 			for i := int(size) - 1; i >= 0; i-- {
 				in[i] = vm.pop()
@@ -109,8 +115,8 @@ func (vm *VM) Run(env interface{}) error {
 			out := fn.Call(in)
 			vm.push(out[0])
 		case code.OpLoadConst:
-			constIndex := binary.BigEndian.Uint16(vm.instructions[ip+1:])
-			ip += 2
+			constIndex := binary.BigEndian.Uint16(vm.instructions[vm.sp+1:])
+			vm.sp += 2
 			v := reflect.ValueOf(env)
 			kind := v.Kind()
 			if kind == reflect.Invalid {
@@ -133,8 +139,9 @@ func (vm *VM) Run(env interface{}) error {
 				}
 			}
 		default:
-			return fmt.Errorf("unsupported opcode: %d", code.Opcode(vm.instructions[ip]))
+			return fmt.Errorf("unsupported opcode: %d", code.Opcode(vm.instructions[vm.sp]))
 		}
+		vm.sp++
 	}
 	return nil
 }
