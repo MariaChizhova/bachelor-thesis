@@ -200,9 +200,9 @@ func (vm *VM) Run(env interface{}) error {
 }
 
 func (vm *VM) push(value interface{}) {
-	switch value.(type) {
+	switch v := value.(type) {
 	case string:
-		vm.stackString = append(vm.stackString, value.(string))
+		vm.stackString = append(vm.stackString, v)
 		vm.stack = append(vm.stack, nil)
 	default:
 		vm.stack = append(vm.stack, value)
@@ -215,8 +215,5 @@ func (vm *VM) pop() (interface{}, string) {
 	valueString := vm.stackString[len(vm.stackString)-1]
 	vm.stackString = vm.stackString[:len(vm.stackString)-1]
 	vm.stack = vm.stack[:len(vm.stack)-1]
-	if value == nil {
-		return nil, valueString
-	}
-	return value, ""
+	return value, valueString
 }
