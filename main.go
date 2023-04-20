@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
-import (
-	"strconv"
-)
-
 func main() {
-	file, err := os.Open("benchmarks/register_based_interfaces.log")
+	file, err := os.Open("benchmarks/2.log")
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -111,18 +111,6 @@ func Benchmark_reflectBased(b *testing.B) {
 	}
 }
 
-func generateSumBytecode(n int) []int64 {
-	bytecode := []int64{
-		vm4.OpConstant, vm4.R0, 0,
-	}
-	for i := 1; i <= n; i++ {
-		bytecode = append(bytecode, vm4.OpConstant, vm4.R1, int64(i))
-		bytecode = append(bytecode, vm4.OpAdd, vm4.R0, vm4.R1)
-	}
-	bytecode = append(bytecode, vm4.OpPrint, vm4.R0, vm4.OpHalt)
-	return bytecode
-}
-
 func Benchmark_registerBased(b *testing.B) {
 	for i := 1; i <= 100; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
@@ -142,20 +130,8 @@ func Benchmark_registerBased(b *testing.B) {
 	}
 }
 
-func generateSumBytecodeInterface(n int) []interface{} {
-	bytecode := []interface{}{
-		vm4.OpConstant, vm4.R0, 0,
-	}
-	for i := 1; i <= n; i++ {
-		bytecode = append(bytecode, vm4.OpConstant, vm4.R1, int64(i))
-		bytecode = append(bytecode, vm4.OpAdd, vm4.R0, vm4.R1)
-	}
-	bytecode = append(bytecode, vm4.OpPrint, vm4.R0, vm4.OpHalt)
-	return bytecode
-}
-
 func Benchmark_registerBasedInterfaces(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 1; i <= 76; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			program := generateSumBytecodeInterface(i)
 			var out interface{}
@@ -174,43 +150,117 @@ func Benchmark_registerBasedInterfaces(b *testing.B) {
 }
 
 // Strings
-func Benchmark_singleStackStrings(b *testing.B) {
-	tree := parser.Parse(`"a" + "b" + "c" + "d" + "e" + "d" + "e"`)
-	program, err := compiler.Compile(tree)
-	var out interface{}
-	vm := vm.New(program.Instructions, program.Constants)
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		err = vm.Run(nil)
-	}
-	b.StopTimer()
-	out = vm.StackTop()
+func Benchmark_treeTraversalStrings(b *testing.B) {
+	for i := 1; i <= 100; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			tree := parser.Parse(concatenateStrings(i))
+			var out interface{}
+			var err error
 
-	if err != nil {
-		b.Fatal(err)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				out, err = evaluator.Eval(tree, nil)
+			}
+			b.StopTimer()
+
+			if err != nil {
+				b.Fatal(err)
+			}
+			if out.(string) != concatenateStringsResult(i) {
+				b.Fail()
+			}
+		})
 	}
-	if out.(string) != "abcdede" {
-		b.Fail()
+}
+
+func Benchmark_singleStackStrings(b *testing.B) {
+	for i := 1; i <= 100; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			tree := parser.Parse(concatenateStrings(i))
+			program, err := compiler.Compile(tree)
+			var out interface{}
+			vm := vm.New(program.Instructions, program.Constants)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				err = vm.Run(nil)
+			}
+			b.StopTimer()
+			out = vm.StackTop()
+
+			if err != nil {
+				b.Fatal(err)
+			}
+			if out.(string) != concatenateStringsResult(i) {
+				b.Fail()
+			}
+		})
 	}
 }
 
 func Benchmark_multipleStacksStrings(b *testing.B) {
-	tree := parser.Parse(`"a" + "b" + "c" + "d" + "e" + "d" + "e"`)
-	program, err := compiler.Compile(tree)
-	var out interface{}
+	for i := 1; i <= 100; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			tree := parser.Parse(concatenateStrings(i))
+			program, err := compiler.Compile(tree)
+			var out interface{}
+			vm := vm2.New(program.Instructions, program.Constants)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				err = vm.Run(nil)
+			}
+			b.StopTimer()
+			out = vm.StackTop()
 
-	vm := vm2.New(program.Instructions, program.Constants)
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		err = vm.Run(nil)
+			if err != nil {
+				b.Fatal(err)
+			}
+			if out.(string) != concatenateStringsResult(i) {
+				b.Fail()
+			}
+		})
 	}
-	b.StopTimer()
-	out = vm.StackTop()
-	if err != nil {
-		b.Fatal(err)
+}
+
+func Benchmark_reflectBasedStrings(b *testing.B) {
+	for i := 1; i <= 100; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			tree := parser.Parse(concatenateStrings(i))
+			program, err := compiler.Compile(tree)
+			var out interface{}
+			vm := vm3.New(program.Instructions, program.Constants)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				err = vm.Run(nil)
+			}
+			b.StopTimer()
+			out = vm.StackTop()
+
+			if err != nil {
+				b.Fatal(err)
+			}
+			if out.(string) != concatenateStringsResult(i) {
+				b.Fail()
+			}
+		})
 	}
-	if out.(string) != "abcdede" {
-		b.Fail()
+}
+
+func Benchmark_registerBasedInterfacesStrings(b *testing.B) {
+	for i := 1; i <= 100; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			program := generateSumBytecodeInterfaceStrings(i)
+			var out interface{}
+			vm := vm5.New(program)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				vm.Run()
+			}
+			b.StopTimer()
+			out = vm.GetResult()
+			if out.(string) != concatenateStringsResult(i) {
+				b.Fail()
+			}
+		})
 	}
 }
 
@@ -294,5 +344,36 @@ func Benchmark_reflectBasedCalls(b *testing.B) {
 	}
 	if out.(int64) != 3 {
 		b.Fail()
+	}
+}
+
+// expression
+func Benchmark_stackBasedExpression(b *testing.B) {
+	for i := 1; i <= 100; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			tree := parser.Parse(getExpression(i))
+			program, err := compiler.Compile(tree)
+			var out interface{}
+			vm := vm.New(program.Instructions, program.Constants)
+
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				err = vm.Run(nil)
+			}
+			b.StopTimer()
+			out = vm.StackTop()
+			if err != nil {
+				b.Fatal(err)
+			}
+			if i%2 != 0 {
+				if out.(int64) != int64((i+1)/2) {
+					b.Fail()
+				}
+			} else {
+				if out.(int64) != int64(-i/2) {
+					b.Fail()
+				}
+			}
+		})
 	}
 }
