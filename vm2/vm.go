@@ -98,20 +98,7 @@ func (vm *VM) Run(env interface{}) error {
 			a, as := vm.pop()
 			b, bs := vm.pop()
 			if a == nil && b == nil {
-				switch code.Opcode(vm.instructions[vm.sp]) {
-				case code.OpEqual:
-					vm.push(as == bs)
-				case code.OpNotEqual:
-					vm.push(as != bs)
-				case code.OpLessThan:
-					vm.push(as < bs)
-				case code.OpGreaterThan:
-					vm.push(as > bs)
-				case code.OpLessOrEqual:
-					vm.push(as <= bs)
-				case code.OpGreaterOrEqual:
-					vm.push(as >= bs)
-				}
+				vm.push(vm.executeComparisonOperation(as, bs, code.Opcode(vm.instructions[vm.sp])))
 			} else {
 				vm.push(vm.executeComparisonOperation(a, b, code.Opcode(vm.instructions[vm.sp])))
 			}

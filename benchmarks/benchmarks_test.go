@@ -10,6 +10,7 @@ import (
 	"bachelor-thesis/vm4"
 	"bachelor-thesis/vm5"
 	"fmt"
+	"math"
 	"testing"
 )
 
@@ -375,5 +376,79 @@ func Benchmark_stackBasedExpression(b *testing.B) {
 				}
 			}
 		})
+	}
+}
+
+var env = map[string]interface{}{
+	"foo1":  func(a, b int64) int64 { return a + b },
+	"foo2":  func(a, b int64) int64 { return a - b },
+	"foo3":  func(a, b int64) int64 { return a * b },
+	"foo4":  func(a, b int64) int64 { return a / b },
+	"foo5":  func(a, b int64) int64 { return a % b },
+	"foo6":  func(a, b int64) int64 { return int64(math.Pow(float64(a), float64(b))) },
+	"foo7":  func(a, b int64) int64 { return 2*a + b },
+	"foo8":  func(a, b int64) int64 { return a + 2*b },
+	"foo9":  func(a, b int64) int64 { return 2*a + 2*b },
+	"foo10": func(a, b int64) int64 { return 2*a - 2*b },
+}
+var code = "foo1(1, 2) + foo2(1, 2) + foo3(1, 2) + foo4(4, 2) + foo5(5, 2) + foo6(2, 2) + foo7(1, 2) + foo8(1, 2) + foo9(1, 2) + foo10(1, 1)"
+var result = 26
+
+func Benchmark_1(b *testing.B) {
+	tree := parser.Parse(code)
+	var out interface{}
+	var err error
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		out, err = evaluator.Eval(tree, env)
+	}
+	b.StopTimer()
+
+	if err != nil {
+		b.Fatal(err)
+	}
+	if out.(int64) != int64(result) {
+		print(out.(int64))
+		b.Fail()
+	}
+}
+
+func Benchmark_2(b *testing.B) {
+	tree := parser.Parse(code)
+	program, err := compiler.Compile(tree)
+	var out interface{}
+	vm := vm.New(program.Instructions, program.Constants)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		err = vm.Run(env)
+	}
+	b.StopTimer()
+	out = vm.StackTop()
+
+	if err != nil {
+		b.Fatal(err)
+	}
+	if out.(int64) != int64(result) {
+		b.Fail()
+	}
+}
+
+func Benchmark_3(b *testing.B) {
+	tree := parser.Parse(code)
+	program, err := compiler.Compile(tree)
+	var out interface{}
+	vm := vm3.New(program.Instructions, program.Constants)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		err = vm.Run(env)
+	}
+	b.StopTimer()
+	out = vm.StackTop()
+
+	if err != nil {
+		b.Fatal(err)
+	}
+	if out.(int64) != int64(result) {
+		b.Fail()
 	}
 }

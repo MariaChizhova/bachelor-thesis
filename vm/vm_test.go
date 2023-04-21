@@ -70,6 +70,10 @@ var vmTests = []vmTest{
 	{"false and false", false},
 	{"(5 > 2) and (2 <= 3) == true", true},
 	{"(1 > 2) or (2 >= 3) == false", true},
+	{`"abc" < "bcd"`, true},
+	{`"abc" <= "bcd"`, true},
+	{`"abcd" > "abc"`, true},
+	{`"abc" >= "abcd"`, false},
 }
 
 func TestVM(t *testing.T) {

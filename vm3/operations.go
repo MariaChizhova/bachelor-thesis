@@ -152,6 +152,11 @@ func (vm *VM) executeComparisonOperation(a, b reflect.Value, opcode code.Opcode)
 			case reflect.Float64:
 				return reflect.ValueOf(a.Float() < b.Float())
 			}
+		case reflect.String:
+			switch b.Kind() {
+			case reflect.String:
+				return reflect.ValueOf(a.String() < b.String())
+			}
 		}
 	case code.OpLessOrEqual:
 		switch a.Kind() {
@@ -168,6 +173,11 @@ func (vm *VM) executeComparisonOperation(a, b reflect.Value, opcode code.Opcode)
 				return reflect.ValueOf(a.Float() <= float64(b.Int()))
 			case reflect.Float64:
 				return reflect.ValueOf(a.Float() <= b.Float())
+			}
+		case reflect.String:
+			switch b.Kind() {
+			case reflect.String:
+				return reflect.ValueOf(a.String() <= b.String())
 			}
 		}
 	case code.OpGreaterThan:
@@ -186,6 +196,11 @@ func (vm *VM) executeComparisonOperation(a, b reflect.Value, opcode code.Opcode)
 			case reflect.Float64:
 				return reflect.ValueOf(a.Float() > b.Float())
 			}
+		case reflect.String:
+			switch b.Kind() {
+			case reflect.String:
+				return reflect.ValueOf(a.String() > b.String())
+			}
 		}
 	case code.OpGreaterOrEqual:
 		switch a.Kind() {
@@ -202,6 +217,11 @@ func (vm *VM) executeComparisonOperation(a, b reflect.Value, opcode code.Opcode)
 				return reflect.ValueOf(a.Float() >= float64(b.Int()))
 			case reflect.Float64:
 				return reflect.ValueOf(a.Float() >= b.Float())
+			}
+		case reflect.String:
+			switch b.Kind() {
+			case reflect.String:
+				return reflect.ValueOf(a.String() >= b.String())
 			}
 		}
 	case code.OpEqual:

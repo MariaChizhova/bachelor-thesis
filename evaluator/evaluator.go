@@ -220,6 +220,11 @@ func EvalBinary(node ast.Node, env interface{}) (interface{}, error) {
 			case float64:
 				return l < r, nil
 			}
+		case string:
+			switch r := right.(type) {
+			case string:
+				return l < r, nil
+			}
 		}
 	case "<=":
 		switch l := left.(type) {
@@ -235,6 +240,11 @@ func EvalBinary(node ast.Node, env interface{}) (interface{}, error) {
 			case int64:
 				return l <= float64(r), nil
 			case float64:
+				return l <= r, nil
+			}
+		case string:
+			switch r := right.(type) {
+			case string:
 				return l <= r, nil
 			}
 		}
@@ -254,6 +264,11 @@ func EvalBinary(node ast.Node, env interface{}) (interface{}, error) {
 			case float64:
 				return l > r, nil
 			}
+		case string:
+			switch r := right.(type) {
+			case string:
+				return l > r, nil
+			}
 		}
 	case ">=":
 		switch l := left.(type) {
@@ -269,6 +284,11 @@ func EvalBinary(node ast.Node, env interface{}) (interface{}, error) {
 			case int64:
 				return l >= float64(r), nil
 			case float64:
+				return l >= r, nil
+			}
+		case string:
+			switch r := right.(type) {
+			case string:
 				return l >= r, nil
 			}
 		}
