@@ -72,8 +72,8 @@ var definitions = map[Opcode]*Definition{
 	OpGreaterThan:    {"OpGreaterThan", []int{}},
 	OpLessOrEqual:    {"OpLessOrEqual", []int{}},
 	OpGreaterOrEqual: {"OpGreaterOrEqual", []int{}},
-	OpJumpIfTrue:     {"OpJumpIfTrue", []int{}},
-	OpJumpIfFalse:    {"OpJumpIfFalse", []int{}},
+	OpJumpIfTrue:     {"OpJumpIfTrue", []int{2}},
+	OpJumpIfFalse:    {"OpJumpIfFalse", []int{2}},
 
 	OpMinus: {"OpMinus", []int{}},
 
@@ -169,4 +169,34 @@ func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
 		offset += width
 	}
 	return operands, offset
+}
+
+func UpdateOperands(ins Instructions, newOperands []int) (Instructions, error) {
+	def, err := Lookup(ins[0])
+	if err != nil {
+		return nil, err
+	}
+
+	if len(newOperands) != len(def.OperandWidths) {
+		return nil, fmt.Errorf("operand count mismatch: expected %d, got %d", len(def.OperandWidths), len(newOperands))
+	}
+
+	newIns := make(Instructions, len(ins))
+	copy(newIns, ins)
+
+	offset := 1
+	for i, width := range def.OperandWidths {
+		switch width {
+		case 2:
+			binary.BigEndian.PutUint16(newIns[offset:], uint16(newOperands[i]))
+		case 1:
+			newIns[offset] = byte(newOperands[i])
+		default:
+			return nil, fmt.Errorf("unsupported operand width: %d", width)
+		}
+
+		offset += width
+	}
+
+	return newIns, nil
 }

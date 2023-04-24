@@ -124,13 +124,15 @@ func (vm *VM) Run(env interface{}) error {
 			vm.push(!v.(bool))
 		case code.OpJumpIfTrue:
 			pos := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
+			vm.sp += 2
 			if vm.StackTop().(bool) {
-				vm.sp = pos - 1
+				vm.sp += pos
 			}
 		case code.OpJumpIfFalse:
 			pos := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
+			vm.sp += 2
 			if !vm.StackTop().(bool) {
-				vm.sp = pos - 1
+				vm.sp += pos
 			}
 		case code.OpCall:
 			elem, _ := vm.pop()

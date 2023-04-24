@@ -68,19 +68,24 @@ var vmTests = []vmTest{
 	{"false or false", false},
 	{"true and false", false},
 	{"false and false", false},
+	{`false or true`, true},
 	{"(5 > 2) and (2 <= 3) == true", true},
 	{"(1 > 2) or (2 >= 3) == false", true},
 	{`"abc" < "bcd"`, true},
 	{`"abc" <= "bcd"`, true},
 	{`"abcd" > "abc"`, true},
 	{`"abc" >= "abcd"`, false},
+	{`("rv" == "t") and ("dntxr" > "c") or ("ssjy" == "l") or ("snso" < "uox") and ("qym" < "qyi") and ("tvzew" < "i") or ("bv" <= "xw")`, true},
+	{`false and false or true`, true},
+	{`("qym" < "qyi") and ("tvzew" < "i") or ("bv" <= "xw")`, true},
+	{`("kt" >= "cwcg") and ("pppvp" > "xqqew") or ("geh" <= "wst") and ("je" != "wvvkr") or ("oejgc" < "obsjo") and ("r" != "ml") or ("bkyay" >= "hqdnn")`, true},
 }
 
 func TestVM(t *testing.T) {
 	for _, test := range vmTests {
 		tree := parser.Parse(test.input)
 		program, err := compiler.Compile(tree)
-		// print(program.Instructions.String())
+		print(program.Instructions.String())
 		vm := New(program.Instructions, program.Constants)
 		err = vm.Run(nil)
 		require.NoError(t, err, test.input)

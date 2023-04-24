@@ -37,9 +37,9 @@ func (vm *VM) Run(env interface{}) error {
 	for vm.sp < len(vm.instructions) {
 		switch code.Opcode(vm.instructions[vm.sp]) {
 		case code.OpConstant:
-			constIndex := binary.BigEndian.Uint16(vm.instructions[vm.sp+1:])
-			vm.sp += 2
+			constIndex := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
 			vm.push(vm.constants[constIndex])
+			vm.sp += 2
 		case code.OpPop:
 			vm.pop()
 		case code.OpTrue:
@@ -93,13 +93,15 @@ func (vm *VM) Run(env interface{}) error {
 			vm.push(!v)
 		case code.OpJumpIfTrue:
 			pos := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
+			vm.sp += 2
 			if vm.StackTop().(bool) {
-				vm.sp = pos - 1
+				vm.sp += pos
 			}
 		case code.OpJumpIfFalse:
 			pos := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
+			vm.sp += 2
 			if !vm.StackTop().(bool) {
-				vm.sp = pos - 1
+				vm.sp += pos
 			}
 		case code.OpCall:
 			fn := reflect.ValueOf(vm.pop())

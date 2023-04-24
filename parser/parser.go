@@ -22,8 +22,8 @@ var unaryOperators = map[string]int{
 }
 
 var binaryOperators = map[string]int{
-	"and": 1,
-	"or":  2,
+	"or":  1,
+	"and": 2,
 	"<":   3,
 	"<=":  3,
 	">":   3,

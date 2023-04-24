@@ -52,7 +52,6 @@ func (vm *VM) NextCode() interface{} {
 }
 
 func (vm *VM) GetResult() interface{} {
-	//return math.Float64frombits(vm.registers[vm.instructions[vm.ip-1]])
 	return vm.registers[vm.instructions[vm.ip-1].(int)]
 }
 

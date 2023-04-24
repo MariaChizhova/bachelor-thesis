@@ -65,11 +65,11 @@ var parseTests = []parseTest{
 	},
 	{
 		"a and b or c",
-		&ast.BinaryNode{Operator: "and",
-			Left: &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
-			Right: &ast.BinaryNode{Operator: "or",
-				Left:  &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier},
-				Right: &ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier}}},
+		&ast.BinaryNode{Operator: "or",
+			Left: &ast.BinaryNode{Operator: "and",
+				Left:  &ast.IdentifierNode{Value: "a", NodeType: ast.NodeIdentifier},
+				Right: &ast.IdentifierNode{Value: "b", NodeType: ast.NodeIdentifier}},
+			Right: &ast.IdentifierNode{Value: "c", NodeType: ast.NodeIdentifier}},
 	},
 	{
 		"(a + b)",
@@ -181,6 +181,7 @@ func TestParse(t *testing.T) {
 	for _, test := range parseTests {
 		parseResult := Parse(test.input)
 		if !reflect.DeepEqual(parseResult, test.expected) {
+			fmt.Println(ast.Print(parseResult))
 			t.Errorf("%s:\ngot\n\t%#v\nexpected\n\t%#v", test.input, parseResult, test.expected)
 		}
 	}

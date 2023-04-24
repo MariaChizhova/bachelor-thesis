@@ -3,8 +3,10 @@ package benchmarks
 import (
 	"bachelor-thesis/vm4"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func getSum(n int) string {
@@ -80,4 +82,45 @@ func generateSumBytecodeInterfaceStrings(n int) []interface{} {
 	}
 	bytecode = append(bytecode, vm4.OpPrint, vm4.R0, vm4.OpHalt)
 	return bytecode
+}
+
+func generateString(numArgs int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	var sb strings.Builder
+	for i := 0; i < numArgs; i++ {
+		sb.WriteString("(")
+		sb.WriteString(generateRandomString())
+		sb.WriteString(getRandomComparisonOperator())
+		sb.WriteString(generateRandomString())
+		sb.WriteString(")")
+
+		if i < numArgs-1 {
+			sb.WriteString(getRandomLogicalOperator())
+		}
+	}
+
+	return sb.String()
+}
+
+func generateRandomString() string {
+	var sb strings.Builder
+	sb.WriteString("\"")
+	length := rand.Intn(5) + 1 // length between 1 and 5
+	for i := 0; i < length; i++ {
+		char := byte(rand.Intn(26) + 'a') // random lowercase letter
+		sb.WriteByte(char)
+	}
+	sb.WriteString("\"")
+	return sb.String()
+}
+
+func getRandomComparisonOperator() string {
+	ops := []string{" > ", " < ", " >= ", " <= ", " == ", " != "}
+	return ops[rand.Intn(len(ops))]
+}
+
+func getRandomLogicalOperator() string {
+	ops := []string{" and ", " or "}
+	return ops[rand.Intn(len(ops))]
 }

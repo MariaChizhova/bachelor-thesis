@@ -94,7 +94,6 @@ func (compiler *Compiler) NodeUnary(node *ast.UnaryNode) {
 	case "not":
 		compiler.emit(code.OpNot)
 	}
-	// compiler.emit(code.OpPop)
 }
 
 func (compiler *Compiler) NodeBinary(node *ast.BinaryNode) {
@@ -162,17 +161,18 @@ func (compiler *Compiler) NodeBinary(node *ast.BinaryNode) {
 
 	case "or":
 		compiler.compile(node.Left)
-		compiler.emit(code.OpJumpIfTrue)
+		end := compiler.emit(code.OpJumpIfTrue, 12345)
 		compiler.emit(code.OpPop)
 		compiler.compile(node.Right)
+		compiler.patchJump(end)
 
 	case "and":
 		compiler.compile(node.Left)
-		compiler.emit(code.OpJumpIfFalse)
+		end := compiler.emit(code.OpJumpIfFalse, 12345)
 		compiler.emit(code.OpPop)
 		compiler.compile(node.Right)
+		compiler.patchJump(end)
 	}
-	// compiler.emit(code.OpPop)
 }
 
 func (compiler *Compiler) NodeCall(node *ast.CallNode) {
@@ -212,4 +212,13 @@ func (compiler *Compiler) emit(op code.Opcode, operands ...int) int {
 func (compiler *Compiler) addConstant(constant interface{}) int {
 	compiler.constants = append(compiler.constants, constant)
 	return len(compiler.constants) - 1
+}
+
+func (compiler *Compiler) patchJump(placeholder int) {
+	offset := len(compiler.instructions) - placeholder
+	tmp := 0
+	for i := 0; i < offset; i++ {
+		tmp += len(compiler.instructions[i+placeholder])
+	}
+	compiler.instructions[placeholder-1], _ = code.UpdateOperands(compiler.instructions[placeholder-1], []int{tmp})
 }

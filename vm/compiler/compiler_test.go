@@ -13,7 +13,6 @@ type compilerTest struct {
 	program Program
 }
 
-// TODO: implement more tests
 var compilerTests = []compilerTest{
 	{
 		`true`,
@@ -40,8 +39,7 @@ var compilerTests = []compilerTest{
 				int64(10),
 			},
 			Instructions: concatInstructions([]code.Instructions{
-				code.Make(code.OpConstant),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpConstant)}),
 		},
 	},
 	{
@@ -52,8 +50,7 @@ var compilerTests = []compilerTest{
 			},
 			Instructions: concatInstructions([]code.Instructions{
 				code.Make(code.OpConstant),
-				code.Make(code.OpMinus),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpMinus)}),
 		},
 	},
 	{
@@ -63,8 +60,7 @@ var compilerTests = []compilerTest{
 				1.2,
 			},
 			Instructions: concatInstructions([]code.Instructions{
-				code.Make(code.OpConstant),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpConstant)}),
 		},
 	},
 	{
@@ -85,8 +81,7 @@ var compilerTests = []compilerTest{
 			Instructions: concatInstructions([]code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
-				code.Make(code.OpEqual),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpEqual)}),
 		},
 	},
 	{
@@ -97,8 +92,7 @@ var compilerTests = []compilerTest{
 			},
 			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
-				code.Make(code.OpLessThan),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpLessThan)}),
 		},
 	},
 	{
@@ -109,8 +103,7 @@ var compilerTests = []compilerTest{
 			},
 			Instructions: concatInstructions([]code.Instructions{code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
-				code.Make(code.OpAdd),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpAdd)}),
 		},
 	},
 	{
@@ -132,8 +125,7 @@ var compilerTests = []compilerTest{
 				code.Make(code.OpExp),
 				code.Make(code.OpConstant, 6),
 				code.Make(code.OpMod),
-				code.Make(code.OpAdd),
-				/* code.Make(code.OpPop)*/}),
+				code.Make(code.OpAdd)}),
 		},
 	},
 	{
@@ -145,8 +137,7 @@ var compilerTests = []compilerTest{
 			Instructions: concatInstructions([]code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
-				code.Make(code.OpAdd),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpAdd)}),
 		},
 	},
 	{
@@ -154,8 +145,7 @@ var compilerTests = []compilerTest{
 		Program{
 			// Constants: []interface{}{},
 			Instructions: concatInstructions([]code.Instructions{
-				code.Make(code.OpArray, 0),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpArray, 0)}),
 		},
 	},
 	{
@@ -165,8 +155,7 @@ var compilerTests = []compilerTest{
 			Instructions: concatInstructions([]code.Instructions{
 				code.Make(code.OpConstant, 0),
 				code.Make(code.OpConstant, 1),
-				code.Make(code.OpArray, 2),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpArray, 2)}),
 		},
 	},
 	{
@@ -180,8 +169,7 @@ var compilerTests = []compilerTest{
 				code.Make(code.OpConstant, 2),
 				code.Make(code.OpConstant, 3),
 				code.Make(code.OpMul),
-				code.Make(code.OpArray, 2),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpArray, 2)}),
 		},
 	},
 	{
@@ -195,7 +183,17 @@ var compilerTests = []compilerTest{
 		Program{
 			Instructions: concatInstructions([]code.Instructions{
 				code.Make(code.OpTrue),
-				code.Make(code.OpJumpIfTrue),
+				code.Make(code.OpJumpIfTrue, 4),
+				code.Make(code.OpPop),
+				code.Make(code.OpFalse)}),
+		},
+	},
+	{
+		`false and false`,
+		Program{
+			Instructions: concatInstructions([]code.Instructions{
+				code.Make(code.OpFalse),
+				code.Make(code.OpJumpIfFalse, 4),
 				code.Make(code.OpPop),
 				code.Make(code.OpFalse)}),
 		},
@@ -224,8 +222,7 @@ var compilerTests = []compilerTest{
 				code.Make(code.OpConstant, 1),
 				code.Make(code.OpArray, 2),
 				code.Make(code.OpConstant, 2),
-				code.Make(code.OpIndex),
-				/*code.Make(code.OpPop)*/}),
+				code.Make(code.OpIndex)}),
 		},
 	},
 	{

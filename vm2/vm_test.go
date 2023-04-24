@@ -72,12 +72,16 @@ var vmTests = []vmTest{
 	{"false or false", false},
 	{"true and false", false},
 	{"false and false", false},
+	{`false or true`, true},
 	{"(5 > 2) and (2 <= 3) == true", true},
 	{"(1 > 2) or (2 >= 3) == false", true},
 	{`"abc" < "bcd"`, true},
 	{`"abc" <= "bcd"`, true},
 	{`"abcd" > "abc"`, true},
 	{`"abc" >= "abcd"`, false},
+	{`("rv" == "t") and ("dntxr" > "c") or ("ssjy" == "l") or ("snso" < "uox") and ("qym" < "qyi") and ("tvzew" < "i") or ("bv" <= "xw")`, true},
+	{`false and false or true`, true},
+	{`("qym" < "qyi") and ("tvzew" < "i") or ("bv" <= "xw")`, true},
 }
 
 func TestVM(t *testing.T) {

@@ -10,6 +10,7 @@ import (
 	"bachelor-thesis/vm4"
 	"bachelor-thesis/vm5"
 	"fmt"
+	"github.com/antonmedv/expr"
 	"math"
 	"testing"
 )
@@ -247,7 +248,7 @@ func Benchmark_reflectBasedStrings(b *testing.B) {
 }
 
 func Benchmark_registerBasedInterfacesStrings(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 1; i <= 1; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			program := generateSumBytecodeInterfaceStrings(i)
 			var out interface{}
@@ -379,6 +380,7 @@ func Benchmark_stackBasedExpression(b *testing.B) {
 	}
 }
 
+// different number of functions with the same arguments
 var env = map[string]interface{}{
 	"foo1":  func(a, b int64) int64 { return a + b },
 	"foo2":  func(a, b int64) int64 { return a - b },
@@ -450,5 +452,30 @@ func Benchmark_3(b *testing.B) {
 	}
 	if out.(int64) != int64(result) {
 		b.Fail()
+	}
+}
+
+// combination of booleans and strings like these:
+// ("a" > "b") and ("a" == "c") or ("x" <= "xy"), where numArgs = number of Brackets
+func Benchmark_booleansStrings(b *testing.B) {
+	for i := 1; i <= 50; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			code = generateString(i)
+			tree := parser.Parse(code)
+			var out interface{}
+			var err error
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				out, err = evaluator.Eval(tree, nil)
+			}
+			b.StopTimer()
+			if err != nil {
+				b.Fatal(err)
+			}
+			res, _ := expr.Eval(code, nil)
+			if out.(bool) != res {
+				b.Fail()
+			}
+		})
 	}
 }
