@@ -135,16 +135,15 @@ func Benchmark_registerBased(b *testing.B) {
 func Benchmark_registerBasedInterfaces(b *testing.B) {
 	for i := 1; i <= 76; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
-			program := generateSumBytecodeInterface(i)
-			var out interface{}
+			program := generateSumBytecode2(i)
 			vm := vm5.New(program)
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
 				vm.Run()
 			}
 			b.StopTimer()
-			out = vm.GetResult()
-			if out.(int64) != int64(i*(i+1)/2) {
+			out := vm.Registers[3].(int)
+			if out != i*(i+1)/2 {
 				b.Fail()
 			}
 		})
@@ -247,25 +246,6 @@ func Benchmark_reflectBasedStrings(b *testing.B) {
 	}
 }
 
-func Benchmark_registerBasedInterfacesStrings(b *testing.B) {
-	for i := 1; i <= 1; i++ {
-		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
-			program := generateSumBytecodeInterfaceStrings(i)
-			var out interface{}
-			vm := vm5.New(program)
-			b.ResetTimer()
-			for n := 0; n < b.N; n++ {
-				vm.Run()
-			}
-			b.StopTimer()
-			out = vm.GetResult()
-			if out.(string) != concatenateStringsResult(i) {
-				b.Fail()
-			}
-		})
-	}
-}
-
 // Function calls
 func Benchmark_treeTraversalCalls(b *testing.B) {
 	env := map[string]interface{}{"add": func(a, b int64) int64 { return a + b }}
@@ -356,7 +336,7 @@ func Benchmark_stackBasedExpression(b *testing.B) {
 			tree := parser.Parse(getExpression(i))
 			program, err := compiler.Compile(tree)
 			var out interface{}
-			vm := vm.New(program.Instructions, program.Constants)
+			vm := vm3.New(program.Instructions, program.Constants)
 
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
@@ -373,6 +353,30 @@ func Benchmark_stackBasedExpression(b *testing.B) {
 				}
 			} else {
 				if out.(int64) != int64(-i/2) {
+					b.Fail()
+				}
+			}
+		})
+	}
+}
+
+func Benchmark_registerBasedExpression(b *testing.B) {
+	for i := 1; i <= 100; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			program := generateExpressionBytecode2(i)
+			vm := vm5.New(program)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				vm.Run()
+			}
+			b.StopTimer()
+			out := vm.Registers[3].(int)
+			if i%2 != 0 {
+				if out != (i+1)/2 {
+					b.Fail()
+				}
+			} else {
+				if out != -i/2 {
 					b.Fail()
 				}
 			}
