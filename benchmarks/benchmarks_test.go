@@ -7,7 +7,6 @@ import (
 	"bachelor-thesis/vm/compiler"
 	"bachelor-thesis/vm2"
 	"bachelor-thesis/vm3"
-	"bachelor-thesis/vm4"
 	"bachelor-thesis/vm5"
 	"fmt"
 	"github.com/antonmedv/expr"
@@ -106,25 +105,6 @@ func Benchmark_reflectBased(b *testing.B) {
 			if err != nil {
 				b.Fatal(err)
 			}
-			if out.(int64) != int64(i*(i+1)/2) {
-				b.Fail()
-			}
-		})
-	}
-}
-
-func Benchmark_registerBased(b *testing.B) {
-	for i := 1; i <= 100; i++ {
-		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
-			program := generateSumBytecode(i)
-			var out interface{}
-			vm := vm4.New(program)
-			b.ResetTimer()
-			for n := 0; n < b.N; n++ {
-				vm.Run()
-			}
-			b.StopTimer()
-			out = vm.GetResult()
 			if out.(int64) != int64(i*(i+1)/2) {
 				b.Fail()
 			}
@@ -239,6 +219,25 @@ func Benchmark_reflectBasedStrings(b *testing.B) {
 			if err != nil {
 				b.Fatal(err)
 			}
+			if out.(string) != concatenateStringsResult(i) {
+				b.Fail()
+			}
+		})
+	}
+}
+
+func Benchmark_registerBasedStrings(b *testing.B) {
+	for i := 1; i <= 10; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			program := generateBytecodeInterfaceStrings(i)
+			var out interface{}
+			vm := vm5.New(program)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				vm.Run()
+			}
+			b.StopTimer()
+			out = vm.Registers[3]
 			if out.(string) != concatenateStringsResult(i) {
 				b.Fail()
 			}

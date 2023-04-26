@@ -1,10 +1,15 @@
 package vm5
 
 var (
-	OpExit     = 0x00
-	OpStoreInt = 0x01
-	OpAdd      = 0x02
-	OpSub      = 0x03
+	OpExit         = 0x00
+	OpStoreInt     = 0x01
+	OpAdd          = 0x02
+	OpSub          = 0x03
+	OpStoreString  = 0x04
+	OpStringConcat = 0x05
+	OpStoreBool    = 0x06
+	OpCmpReg       = 0x07
+	OpEQ           = 0x08
 )
 
 type Opcode struct {
@@ -27,6 +32,18 @@ func (o *Opcode) String() string {
 		return "OpAdd"
 	case OpSub:
 		return "OpSub"
+	case OpStoreString:
+		return "OpStoreString"
+	case OpStringConcat:
+		return "OpStringConcat"
+	case OpStoreBool:
+		return "OpStoreBool"
+	case OpCmpReg:
+		return "OpCmpReg"
+		//case OpJumpZ:
+		//	return "OpJumpZ"
+		//case OpJumpNZ:
+		//	return "OpJumpNZ"
 	}
 	return "unknown opcode .."
 }

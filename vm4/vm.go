@@ -1,178 +1,107 @@
 package vm4
 
 import (
+	"bachelor-thesis/vm/code"
+	"encoding/binary"
 	"fmt"
-	"math"
-)
-
-const (
-	R0 = iota
-	R1
-	R2
-	R3
-)
-
-const (
-	OpConstant = iota
-	OpBool
-	OpNil
-	OpAdd
-	OpSub
-	OpMul
-	OpDiv
-	OpMod
-	OpExp
-	OpMinus
-	OpEqual
-	OpNotEqual
-	OpLessThan
-	OpGreaterThan
-	OpLessOrEqual
-	OpGreaterOrEqual
-	OpPrint
-	OpHalt
 )
 
 type VM struct {
-	registers    []int64
-	ip           int
-	instructions []int64
+	constants    []interface{}
+	instructions code.Instructions
+	stack        []interface{}
+	stackInt     []int64
+	sp           int
 }
 
-func New(instructions []int64) *VM {
+func New(instructions code.Instructions, constants []interface{}) *VM {
 	return &VM{
-		registers:    make([]int64, 4),
-		ip:           -1,
 		instructions: instructions,
+		constants:    constants,
+		stack:        make([]interface{}, 0),
+		stackInt:     make([]int64, 0),
+		sp:           0,
 	}
 }
 
-func (vm *VM) NextCode() int64 {
-	vm.ip++
-	return vm.instructions[vm.ip]
-}
-
-func (vm *VM) GetResult() interface{} {
-	//return math.Float64frombits(vm.registers[vm.instructions[vm.ip-1]])
-	return vm.registers[vm.instructions[vm.ip-1]]
-}
-
-func (vm *VM) PrintRuntimeInfo() {
-	fmt.Printf("IP: %d \n", vm.ip)
-	for k, v := range vm.registers {
-		fmt.Printf("reg: %d, value: %d\n", k, v)
+func (vm *VM) StackTop() interface{} {
+	if vm.stack[len(vm.stack)-1] != nil {
+		return vm.stack[len(vm.stack)-1]
+	} else {
+		return vm.stackInt[len(vm.stackInt)-1]
 	}
 }
 
-func (vm *VM) Run() error {
-	vm.ip = -1
-	for {
-		instr := vm.NextCode()
-		switch instr {
-		case OpConstant:
-			reg := vm.NextCode()
-			value := vm.NextCode()
-			vm.registers[uint(reg)] = value
-		case OpBool:
-			reg := vm.NextCode()
-			value := vm.NextCode()
-			vm.registers[uint(reg)] = value
-		case OpNil:
-			reg := vm.NextCode()
-			vm.registers[uint(reg)] = -1
-		case OpAdd:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			vm.registers[reg1] += vm.registers[reg2]
-		case OpSub:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			vm.registers[reg1] -= vm.registers[reg2]
-		case OpMul:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			vm.registers[reg1] *= vm.registers[reg2]
-		case OpDiv:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			vm.registers[reg1] /= vm.registers[reg2]
-		case OpMod:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			vm.registers[reg1] %= vm.registers[reg2]
-		case OpExp:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			vm.registers[reg1] = int64(math.Pow(float64(vm.registers[reg1]), float64(vm.registers[reg2])))
-		case OpMinus:
-			reg := uint(vm.NextCode())
-			vm.registers[reg] = -vm.registers[reg]
-		case OpEqual:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			reg3 := uint(vm.NextCode())
-			if vm.registers[reg2] == vm.registers[reg3] {
-				vm.registers[reg1] = 1
-			} else {
-				vm.registers[reg1] = 0
+func (vm *VM) Run(env interface{}) error {
+	if vm.stack == nil {
+		vm.stack = make([]interface{}, 0, 2)
+	} else {
+		vm.stack = vm.stack[0:0]
+	}
+	if vm.stackInt == nil {
+		vm.stackInt = make([]int64, 0, 2)
+	} else {
+		vm.stackInt = vm.stackInt[0:0]
+	}
+	vm.sp = 0
+	for vm.sp < len(vm.instructions) {
+		switch code.Opcode(vm.instructions[vm.sp]) {
+		case code.OpConstant:
+			constIndex := binary.BigEndian.Uint16(vm.instructions[vm.sp+1:])
+			vm.sp += 2
+			if int(constIndex) >= len(vm.constants) {
+				return fmt.Errorf("constant index out of range: %d", constIndex)
 			}
-		case OpNotEqual:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			reg3 := uint(vm.NextCode())
-			if vm.registers[reg2] != vm.registers[reg3] {
-				vm.registers[reg1] = 1
+			vm.push(vm.constants[constIndex])
+		case code.OpPop:
+			vm.pop()
+		case code.OpTrue:
+			vm.push(true)
+		case code.OpFalse:
+			vm.push(false)
+		case code.OpNil:
+			vm.push(nil)
+		case code.OpAdd:
+			a, ai := vm.pop()
+			b, bi := vm.pop()
+			if a == nil && b == nil {
+				vm.push(bi + ai)
 			} else {
-				vm.registers[reg1] = 0
+				vm.push(vm.executeAddOperation(b, a))
 			}
-		case OpLessThan:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			reg3 := uint(vm.NextCode())
-			if vm.registers[reg2] < vm.registers[reg3] {
-				vm.registers[reg1] = 1
+		case code.OpSub:
+			a, ai := vm.pop()
+			b, bi := vm.pop()
+			if a == nil && b == nil {
+				vm.push(bi - ai)
 			} else {
-				vm.registers[reg1] = 0
+				vm.push(vm.executeAddOperation(b, a))
 			}
-		case OpLessOrEqual:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			reg3 := uint(vm.NextCode())
-			if vm.registers[reg2] <= vm.registers[reg3] {
-				vm.registers[reg1] = 1
-			} else {
-				vm.registers[reg1] = 0
-			}
-		case OpGreaterThan:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			reg3 := uint(vm.NextCode())
-			if vm.registers[reg2] > vm.registers[reg3] {
-				vm.registers[reg1] = 1
-			} else {
-				vm.registers[reg1] = 0
-			}
-		case OpGreaterOrEqual:
-			reg1 := uint(vm.NextCode())
-			reg2 := uint(vm.NextCode())
-			reg3 := uint(vm.NextCode())
-			if vm.registers[reg2] >= vm.registers[reg3] {
-				vm.registers[reg1] = 1
-			} else {
-				vm.registers[reg1] = 0
-			}
-		case OpPrint:
-			vm.NextCode()
-			//reg := uint(vm.NextCode())
-			//fmt.Println("Result: ", vm.registers[reg])
-		case OpHalt:
-			return nil
+		case code.OpMinus:
+			vm.push(vm.executeMinusOperator())
 		default:
-			if vm.ip >= len(vm.instructions) {
-				return fmt.Errorf("read all programs")
-			}
-			return fmt.Errorf("unsupported opcode: %d", vm.instructions[vm.ip])
+			return fmt.Errorf("unsupported opcode: %d", code.Opcode(vm.instructions[vm.sp]))
 		}
+		vm.sp++
 	}
 	return nil
+}
+
+func (vm *VM) push(value interface{}) {
+	switch v := value.(type) {
+	case int64:
+		vm.stackInt = append(vm.stackInt, v)
+		vm.stack = append(vm.stack, nil)
+	default:
+		vm.stack = append(vm.stack, value)
+		vm.stackInt = append(vm.stackInt, 0)
+	}
+}
+
+func (vm *VM) pop() (interface{}, int64) {
+	value := vm.stack[len(vm.stack)-1]
+	valueInt := vm.stackInt[len(vm.stackInt)-1]
+	vm.stackInt = vm.stackInt[:len(vm.stackInt)-1]
+	vm.stack = vm.stack[:len(vm.stack)-1]
+	return value, valueInt
 }

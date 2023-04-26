@@ -1,1 +1,1 @@
-#### Register-based virtual machine
+#### Multiple stack-based virtual machine with separate stack for int

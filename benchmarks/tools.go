@@ -103,15 +103,22 @@ func generateExpressionBytecode2(n int) []byte {
 	return bytecode
 }
 
-func generateSumBytecodeInterfaceStrings(n int) []interface{} {
-	bytecode := []interface{}{
-		vm4.OpConstant, vm4.R0, "a",
+func generateBytecodeInterfaceStrings(n int) []byte {
+	bytecode := []byte{}
+	if n == 1 {
+		bytecode = []byte{byte(vm5.OpStoreString), 3, 1, byte('a')} //, 0}
+	} else {
+		bytecode = []byte{byte(vm5.OpStoreString), 1, 1, byte('a')} //, 0}
+		if n >= 2 {
+			bytecode = append(bytecode, byte(vm5.OpStoreString), 2, 1, byte('b')) //, 0)
+			bytecode = append(bytecode, byte(vm5.OpStringConcat), 3, 1, 2)
+		}
+		for i := 3; i <= n; i++ {
+			bytecode = append(bytecode, byte(vm5.OpStoreString), 1, 1, byte('a'+rune((i-1)%26))) //, 0)
+			bytecode = append(bytecode, byte(vm5.OpStringConcat), 3, 3, 1)
+		}
 	}
-	for i := 1; i < n; i++ {
-		bytecode = append(bytecode, vm4.OpConstant, vm4.R1, string('a'+rune(i%26)))
-		bytecode = append(bytecode, vm4.OpAdd, vm4.R0, vm4.R1)
-	}
-	bytecode = append(bytecode, vm4.OpPrint, vm4.R0, vm4.OpHalt)
+	bytecode = append(bytecode, byte(vm5.OpExit))
 	return bytecode
 }
 
