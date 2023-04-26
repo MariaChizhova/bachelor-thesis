@@ -2,17 +2,20 @@ package vm5
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type VM struct {
-	Registers    [4]interface{}
+	Registers    [16]interface{}
 	ip           int
 	instructions []byte
+	constants    []interface{}
 }
 
-func New(instructions []byte) *VM {
+func New(program Program) *VM {
 	return &VM{
-		instructions: instructions,
+		instructions: program.Instructions,
+		constants:    program.Constants,
 	}
 }
 
@@ -46,7 +49,7 @@ func (vm *VM) readString() (string, error) {
 	}
 }
 
-func (vm *VM) Run() error {
+func (vm *VM) Run(env interface{}) error {
 	vm.ip = 0
 	run := true
 	for run {
@@ -61,7 +64,7 @@ func (vm *VM) Run() error {
 				return fmt.Errorf("register %d out of range", reg)
 			}
 			vm.ip++
-			val := int(vm.instructions[vm.ip]) //vm.read2Val()
+			val := vm.constants[vm.instructions[vm.ip]] //vm.read2Val()
 			vm.ip++
 			vm.Registers[reg] = val
 		case OpAdd:
@@ -84,7 +87,6 @@ func (vm *VM) Run() error {
 			aVal := vm.Registers[a].(int)
 			bVal := vm.Registers[b].(int)
 			vm.Registers[res] = aVal + bVal
-			//fmt.Println("aVal: ", aVal, "bVal: ", bVal, "resVal: ", vm.Registers[res].(int))
 		case OpSub:
 			vm.ip++
 			res := vm.instructions[vm.ip]
@@ -113,10 +115,8 @@ func (vm *VM) Run() error {
 				return fmt.Errorf("register %d out of range", reg)
 			}
 			vm.ip++
-			str, err := vm.readString()
-			if err != nil {
-				return err
-			}
+			str := vm.constants[vm.instructions[vm.ip]]
+			vm.ip++
 			vm.Registers[reg] = str
 		case OpStringConcat:
 			vm.ip++
@@ -132,12 +132,6 @@ func (vm *VM) Run() error {
 				return fmt.Errorf("register %d out of range", b)
 			}
 			vm.ip++
-			if int(a) >= len(vm.Registers) {
-				return fmt.Errorf("register %d out of range", a)
-			}
-			if int(b) >= len(vm.Registers) {
-				return fmt.Errorf("register %d out of range", b)
-			}
 			if int(res) >= len(vm.Registers) {
 				return fmt.Errorf("register %d out of range", res)
 			}
@@ -184,6 +178,38 @@ func (vm *VM) Run() error {
 				bVal := vm.Registers[r2]
 				vm.Registers[res] = aVal == bVal
 			}
+		case OpCall:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			fnAddr := vm.constants[vm.instructions[vm.ip]]
+			vm.ip++
+			v := reflect.ValueOf(env)
+			kind := v.Kind()
+			if kind == reflect.Invalid {
+				fmt.Sprintf("error")
+			}
+			var fn interface{}
+			switch kind {
+			case reflect.Map:
+				value := v.MapIndex(reflect.ValueOf(fnAddr))
+				if value.IsValid() {
+					fn = value.Interface()
+				} else {
+					elem := reflect.TypeOf(env).Elem()
+					fn = reflect.Zero(elem).Interface()
+				}
+			}
+			size := int(vm.instructions[vm.ip])
+			in := make([]reflect.Value, size)
+			vm.ip++
+			for i := 0; i < size; i++ {
+				r := int(vm.instructions[vm.ip])
+				vm.ip++
+				in[i] = reflect.ValueOf(vm.Registers[r])
+			}
+			out := reflect.ValueOf(fn).Call(in)
+			vm.Registers[res] = out[0].Interface()
 		}
 	}
 	return nil

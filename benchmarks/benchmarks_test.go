@@ -112,17 +112,17 @@ func Benchmark_reflectBased(b *testing.B) {
 	}
 }
 
-func Benchmark_registerBasedInterfaces(b *testing.B) {
+func Benchmark_registerBasedSum(b *testing.B) {
 	for i := 1; i <= 76; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
-			program := generateSumBytecode2(i)
+			program := generateSumBytecode(i)
 			vm := vm5.New(program)
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
-				vm.Run()
+				vm.Run(nil)
 			}
 			b.StopTimer()
-			out := vm.Registers[3].(int)
+			out := vm.Registers[3]
 			if out != i*(i+1)/2 {
 				b.Fail()
 			}
@@ -227,18 +227,18 @@ func Benchmark_reflectBasedStrings(b *testing.B) {
 }
 
 func Benchmark_registerBasedStrings(b *testing.B) {
-	for i := 1; i <= 10; i++ {
+	for i := 1; i <= 100; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
-			program := generateBytecodeInterfaceStrings(i)
+			program := generateBytecodeStrings(i)
 			var out interface{}
 			vm := vm5.New(program)
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
-				vm.Run()
+				vm.Run(nil)
 			}
 			b.StopTimer()
 			out = vm.Registers[3]
-			if out.(string) != concatenateStringsResult(i) {
+			if out != concatenateStringsResult(i) {
 				b.Fail()
 			}
 		})
@@ -328,6 +328,38 @@ func Benchmark_reflectBasedCalls(b *testing.B) {
 	}
 }
 
+func Benchmark_registerBasedCalls(b *testing.B) {
+	env := map[string]interface{}{"add": func(a, b, c, d, e, f, g, k, l, m int) int { return a + b + c + d + e + f + g + k + l + m }}
+	program := vm5.Program{
+		Instructions: []byte{
+			byte(vm5.OpStoreInt), 01, 0,
+			byte(vm5.OpStoreInt), 02, 1,
+			byte(vm5.OpStoreInt), 03, 2,
+			byte(vm5.OpStoreInt), 04, 3,
+			byte(vm5.OpStoreInt), 05, 4,
+			byte(vm5.OpStoreInt), 06, 5,
+			byte(vm5.OpStoreInt), 07, 6,
+			byte(vm5.OpStoreInt), 8, 7,
+			byte(vm5.OpStoreInt), 9, 8,
+			byte(vm5.OpStoreInt), 10, 9,
+			byte(vm5.OpCall), 03, 10, 10, 01, 02, 03, 04, 05, 06, 07, 8, 9, 10,
+			byte(vm5.OpExit),
+		},
+		Constants: []interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "add"},
+	}
+	var out interface{}
+	vm := vm5.New(program)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		vm.Run(env)
+	}
+	b.StopTimer()
+	out = vm.Registers[3]
+	if out != 55 {
+		b.Fail()
+	}
+}
+
 // expression
 func Benchmark_stackBasedExpression(b *testing.B) {
 	for i := 1; i <= 100; i++ {
@@ -362,11 +394,11 @@ func Benchmark_stackBasedExpression(b *testing.B) {
 func Benchmark_registerBasedExpression(b *testing.B) {
 	for i := 1; i <= 100; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
-			program := generateExpressionBytecode2(i)
+			program := generateExpressionBytecode(i)
 			vm := vm5.New(program)
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
-				vm.Run()
+				vm.Run(nil)
 			}
 			b.StopTimer()
 			out := vm.Registers[3].(int)
@@ -454,6 +486,87 @@ func Benchmark_3(b *testing.B) {
 		b.Fatal(err)
 	}
 	if out.(int64) != int64(result) {
+		b.Fail()
+	}
+}
+
+var env1 = map[string]interface{}{
+	"foo1":  func(a, b int) int { return a + b },
+	"foo2":  func(a, b int) int { return a - b },
+	"foo3":  func(a, b int) int { return a * b },
+	"foo4":  func(a, b int) int { return a / b },
+	"foo5":  func(a, b int) int { return a % b },
+	"foo6":  func(a, b int) int { return int(math.Pow(float64(a), float64(b))) },
+	"foo7":  func(a, b int) int { return 2*a + b },
+	"foo8":  func(a, b int) int { return a + 2*b },
+	"foo9":  func(a, b int) int { return 2*a + 2*b },
+	"foo10": func(a, b int) int { return 2*a - 2*b },
+}
+
+func Benchmark_registerBasedCalls2(b *testing.B) {
+	program := vm5.Program{
+		Instructions: []byte{
+			byte(vm5.OpStoreInt), 01, 0,
+			byte(vm5.OpStoreInt), 02, 1,
+			byte(vm5.OpCall), 03, 2, 2, 01, 02,
+
+			byte(vm5.OpStoreInt), 01, 3,
+			byte(vm5.OpStoreInt), 02, 4,
+			byte(vm5.OpCall), 04, 5, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpStoreInt), 01, 6,
+			byte(vm5.OpStoreInt), 02, 7,
+			byte(vm5.OpCall), 04, 8, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpStoreInt), 01, 9,
+			byte(vm5.OpStoreInt), 02, 10,
+			byte(vm5.OpCall), 04, 11, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpStoreInt), 01, 12,
+			byte(vm5.OpStoreInt), 02, 13,
+			byte(vm5.OpCall), 04, 14, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpStoreInt), 01, 15,
+			byte(vm5.OpStoreInt), 02, 16,
+			byte(vm5.OpCall), 04, 17, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpStoreInt), 01, 18,
+			byte(vm5.OpStoreInt), 02, 19,
+			byte(vm5.OpCall), 04, 20, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpStoreInt), 01, 21,
+			byte(vm5.OpStoreInt), 02, 22,
+			byte(vm5.OpCall), 04, 23, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpStoreInt), 01, 24,
+			byte(vm5.OpStoreInt), 02, 25,
+			byte(vm5.OpCall), 04, 26, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpStoreInt), 01, 27,
+			byte(vm5.OpStoreInt), 02, 28,
+			byte(vm5.OpCall), 04, 29, 2, 01, 02,
+			byte(vm5.OpAdd), 03, 03, 04,
+
+			byte(vm5.OpExit)},
+		Constants: []interface{}{1, 2, "foo1", 1, 2, "foo2", 1, 2, "foo3", 4, 2, "foo4", 5, 2, "foo5", 2, 2, "foo6",
+			1, 2, "foo7", 1, 2, "foo8", 1, 2, "foo9", 1, 2, "foo10"}}
+	vm := vm5.New(program)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		vm.Run(env1)
+	}
+	b.StopTimer()
+	out := vm.Registers[3]
+	result := (1 + 2) + (1 - 2) + (1 * 2) + (4 / 2) + (5 % 2) + int(math.Pow(float64(2), float64(2))) + (2*1 + 2) + (1 + 2*2) + (2*1 + 2*2) + (2*1 - 2*2)
+	if out != result {
 		b.Fail()
 	}
 }

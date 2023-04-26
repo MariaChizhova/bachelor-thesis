@@ -1,7 +1,6 @@
 package benchmarks
 
 import (
-	"bachelor-thesis/vm4"
 	"bachelor-thesis/vm5"
 	"fmt"
 	"math/rand"
@@ -49,77 +48,77 @@ func concatenateStringsResult(num int) string {
 	return result.String()
 }
 
-func generateSumBytecode(n int) []int64 {
-	bytecode := []int64{
-		vm4.OpConstant, vm4.R0, 1,
-	}
-	for i := 2; i <= n; i++ {
-		bytecode = append(bytecode, vm4.OpConstant, vm4.R1, int64(i))
-		bytecode = append(bytecode, vm4.OpAdd, vm4.R0, vm4.R1)
-	}
-	bytecode = append(bytecode, vm4.OpPrint, vm4.R0, vm4.OpHalt)
-	return bytecode
-}
-
-func generateSumBytecode2(n int) []byte {
-	bytecode := []byte{}
+func generateSumBytecode(n int) vm5.Program {
+	program := vm5.Program{}
 	if n == 1 {
-		bytecode = []byte{byte(vm5.OpStoreInt), 3, byte(1)} //, 0}
+		program.Instructions = []byte{byte(vm5.OpStoreInt), 03, 0}
+		program.Constants = []interface{}{1}
 	} else {
-		bytecode = []byte{byte(vm5.OpStoreInt), 1, byte(1)} //, 0}
+		program.Instructions = []byte{byte(vm5.OpStoreInt), 01, 0}
+		program.Constants = []interface{}{1}
 		if n >= 2 {
-			bytecode = append(bytecode, byte(vm5.OpStoreInt), 2, byte(2)) //, 0)
-			bytecode = append(bytecode, byte(vm5.OpAdd), 3, 1, 2)
+			program.Instructions = append(program.Instructions, byte(vm5.OpStoreInt), 02, 1)
+			program.Constants = append(program.Constants, 2)
+			program.Instructions = append(program.Instructions, byte(vm5.OpAdd), 03, 01, 02)
 		}
 		for i := 3; i <= n; i++ {
-			bytecode = append(bytecode, byte(vm5.OpStoreInt), 1, byte(i)) //, 0)
-			bytecode = append(bytecode, byte(vm5.OpAdd), 3, 1, 3)
+			program.Instructions = append(program.Instructions, byte(vm5.OpStoreInt), 01, byte(i-1))
+			program.Constants = append(program.Constants, i)
+			program.Instructions = append(program.Instructions, byte(vm5.OpAdd), 03, 01, 03)
 		}
 	}
-	bytecode = append(bytecode, byte(vm5.OpExit))
-	return bytecode
+	program.Instructions = append(program.Instructions, byte(vm5.OpExit))
+	return program
 }
 
-func generateExpressionBytecode2(n int) []byte {
-	bytecode := []byte{}
+func generateExpressionBytecode(n int) vm5.Program {
+	program := vm5.Program{}
 	if n == 1 {
-		bytecode = []byte{byte(vm5.OpStoreInt), 3, byte(1)} //, 0}
+		program.Instructions = []byte{byte(vm5.OpStoreInt), 03, 0}
+		program.Constants = []interface{}{1}
 	} else {
-		bytecode = []byte{byte(vm5.OpStoreInt), 1, byte(1)} //, 0}
+		program.Instructions = []byte{byte(vm5.OpStoreInt), 01, 0}
+		program.Constants = []interface{}{1}
 		if n >= 2 {
-			bytecode = append(bytecode, byte(vm5.OpStoreInt), 2, byte(2)) //, 0)
-			bytecode = append(bytecode, byte(vm5.OpSub), 3, 1, 2)
+			program.Instructions = append(program.Instructions, byte(vm5.OpStoreInt), 02, 1)
+			program.Constants = append(program.Constants, 2)
+			program.Instructions = append(program.Instructions, byte(vm5.OpSub), 03, 01, 02)
 		}
 		for i := 3; i <= n; i++ {
-			bytecode = append(bytecode, byte(vm5.OpStoreInt), 1, byte(i)) //, 0)
+			program.Instructions = append(program.Instructions, byte(vm5.OpStoreInt), 01, byte(i-1))
+			program.Constants = append(program.Constants, i)
 			if i%2 == 0 {
-				bytecode = append(bytecode, byte(vm5.OpSub), 3, 3, 1)
+				program.Instructions = append(program.Instructions, byte(vm5.OpSub), 03, 03, 01)
 			} else {
-				bytecode = append(bytecode, byte(vm5.OpAdd), 3, 1, 3)
+				program.Instructions = append(program.Instructions, byte(vm5.OpAdd), 03, 01, 03)
 			}
 		}
 	}
-	bytecode = append(bytecode, byte(vm5.OpExit))
-	return bytecode
+	program.Instructions = append(program.Instructions, byte(vm5.OpExit))
+	return program
 }
 
-func generateBytecodeInterfaceStrings(n int) []byte {
-	bytecode := []byte{}
+func generateBytecodeStrings(n int) vm5.Program {
+	program := vm5.Program{}
 	if n == 1 {
-		bytecode = []byte{byte(vm5.OpStoreString), 3, 1, byte('a')} //, 0}
+		program.Instructions = []byte{byte(vm5.OpStoreString), 03, 0}
+		program.Constants = []interface{}{"a"}
 	} else {
-		bytecode = []byte{byte(vm5.OpStoreString), 1, 1, byte('a')} //, 0}
+		program.Instructions = []byte{byte(vm5.OpStoreString), 01, 0}
+		program.Constants = []interface{}{"a"}
 		if n >= 2 {
-			bytecode = append(bytecode, byte(vm5.OpStoreString), 2, 1, byte('b')) //, 0)
-			bytecode = append(bytecode, byte(vm5.OpStringConcat), 3, 1, 2)
+			program.Instructions = append(program.Instructions, byte(vm5.OpStoreString), 02, 1)
+			program.Constants = append(program.Constants, "b")
+			program.Instructions = append(program.Instructions, byte(vm5.OpStringConcat), 03, 01, 02)
 		}
 		for i := 3; i <= n; i++ {
-			bytecode = append(bytecode, byte(vm5.OpStoreString), 1, 1, byte('a'+rune((i-1)%26))) //, 0)
-			bytecode = append(bytecode, byte(vm5.OpStringConcat), 3, 3, 1)
+			program.Instructions = append(program.Instructions, byte(vm5.OpStoreString), 01, byte(i-1))
+			program.Constants = append(program.Constants, string('a'+rune((i-1)%26)))
+			program.Instructions = append(program.Instructions, byte(vm5.OpStringConcat), 03, 03, 01)
 		}
 	}
-	bytecode = append(bytecode, byte(vm5.OpExit))
-	return bytecode
+	program.Instructions = append(program.Instructions, byte(vm5.OpExit))
+	return program
 }
 
 func generateString(numArgs int) string {

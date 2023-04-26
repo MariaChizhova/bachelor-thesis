@@ -8,8 +8,8 @@ var (
 	OpStoreString  = 0x04
 	OpStringConcat = 0x05
 	OpStoreBool    = 0x06
-	OpCmpReg       = 0x07
-	OpEQ           = 0x08
+	OpEQ           = 0x07
+	OpCall         = 0x08
 )
 
 type Opcode struct {
@@ -38,12 +38,10 @@ func (o *Opcode) String() string {
 		return "OpStringConcat"
 	case OpStoreBool:
 		return "OpStoreBool"
-	case OpCmpReg:
-		return "OpCmpReg"
-		//case OpJumpZ:
-		//	return "OpJumpZ"
-		//case OpJumpNZ:
-		//	return "OpJumpNZ"
+	case OpEQ:
+		return "OpEQ"
+	case OpCall:
+		return "OpCall"
 	}
 	return "unknown opcode .."
 }

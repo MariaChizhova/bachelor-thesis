@@ -7,90 +7,117 @@ import (
 )
 
 type vmTest struct {
-	input    []byte
+	input    Program
 	expected interface{}
 }
 
 var vmTests = []vmTest{
-	{
-		// 10 + 20
-		[]byte{byte(OpStoreInt), 1, 10, // 0,
-			byte(OpStoreInt), 2, 20, // 0,
-			byte(OpAdd), 3, 1, 2,
-			byte(OpExit)}, 30,
+	{ // 10 + 20
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpAdd), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{10, 20},
+		}, 30,
 	},
 	{ // 10 + 20 + 5
-		[]byte{byte(OpStoreInt), 1, 10, // 0,
-			byte(OpStoreInt), 2, 20, //0,
-			byte(OpAdd), 3, 1, 2,
-			byte(OpStoreInt), 1, 5, //0,
-			byte(OpAdd), 3, 1, 3,
-			byte(OpExit)}, 35,
-	},
-	{ // 1 + 2 + 3 + 4
-		[]byte{byte(OpStoreInt), 1, byte(1), // 0,
-			byte(OpStoreInt), 2, byte(2), //, 0,
-			byte(OpAdd), 3, 1, 2,
-			byte(OpStoreInt), 1, byte(3), // 0,
-			byte(OpAdd), 3, 1, 3,
-			byte(OpStoreInt), 1, byte(4), // 0,
-			byte(OpAdd), 3, 1, 3,
-			byte(OpExit)}, 10,
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpAdd), 03, 01, 02,
+				byte(OpStoreInt), 01, 2,
+				byte(OpAdd), 03, 01, 03,
+				byte(OpExit)},
+			Constants: []interface{}{10, 20, 5},
+		}, 35,
 	},
 	{ // 20 - 10
-		[]byte{byte(OpStoreInt), 1, 10, // 0,
-			byte(OpStoreInt), 2, 20, //0,
-			byte(OpSub), 3, 2, 1,
-			byte(OpExit)}, 10,
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpSub), 03, 02, 01,
+				byte(OpExit)},
+			Constants: []interface{}{10, 20},
+		}, 10,
 	},
 	{ // 1 - 2 + 3 - 4
-		[]byte{byte(OpStoreInt), 1, byte(1), // 0,
-			byte(OpStoreInt), 2, byte(2), //, 0,
-			byte(OpSub), 3, 1, 2,
-			byte(OpStoreInt), 1, byte(3), // 0,
-			byte(OpAdd), 3, 1, 3,
-			byte(OpStoreInt), 1, byte(4), // 0,
-			byte(OpSub), 3, 3, 1,
-			byte(OpExit)}, -2,
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpSub), 03, 01, 02,
+				byte(OpStoreInt), 01, 2,
+				byte(OpAdd), 03, 01, 03,
+				byte(OpStoreInt), 01, 3,
+				byte(OpSub), 03, 03, 01,
+				byte(OpExit)},
+			Constants: []interface{}{1, 2, 3, 4},
+		}, -2,
 	},
-	{
-		[]byte{
-			byte(OpStoreString), 03,
-			05,        //00, // length of the string
-			byte('h'), // "hello"
-			byte('e'),
-			byte('l'),
-			byte('l'),
-			byte('o'),
-			byte(OpExit),
+	{ // "hello"
+		Program{
+			Instructions: []byte{byte(OpStoreString), 03, 0,
+				byte(OpExit)},
+			Constants: []interface{}{"hello"},
 		}, "hello",
 	},
-	{
-		[]byte{
+	{Program{
+		Instructions: []byte{
 			byte(OpStoreBool), 03, 1,
 			byte(OpExit),
-		}, true,
+		}}, true,
 	},
-	{
-		[]byte{
+	{Program{
+		Instructions: []byte{
 			byte(OpStoreBool), 03, 0,
 			byte(OpExit),
+		}}, false,
+	},
+	{ // "a" == "b"
+		Program{
+			Instructions: []byte{byte(OpStoreString), 01, 0,
+				byte(OpStoreString), 02, 1,
+				byte(OpEQ), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{"a", "b"},
 		}, false,
 	},
-	{
-		[]byte{
-			byte(OpStoreString), 01, 01, byte('a'),
-			byte(OpStoreString), 02, 01, byte('b'),
-			byte(OpEQ), 03, 01, 02,
-			byte(OpExit),
-		}, false,
+	{ // "a" + "b"
+		Program{
+			Instructions: []byte{byte(OpStoreString), 01, 0,
+				byte(OpStoreString), 02, 1,
+				byte(OpStringConcat), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{"a", "b"},
+		}, "ab",
+	},
+	{ // foo(1, 2)
+		Program{
+			Instructions: []byte{
+				byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpCall), 03, 2, 2, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{1, 2, "foo"}}, 3,
+	},
+	{ // bar(1, 2, 3)
+		Program{
+			Instructions: []byte{
+				byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpStoreInt), 03, 2,
+				byte(OpCall), 03, 4, 3, 01, 02, 03,
+				byte(OpExit)},
+			Constants: []interface{}{1, 2, 3, "bar"}}, 6,
 	},
 }
 
 func TestVM(t *testing.T) {
 	for _, test := range vmTests {
 		vm := New(test.input)
-		err := vm.Run()
+		err := vm.Run(map[string]interface{}{
+			"foo": func(a, b int) int { return a + b },
+			"bar": func(a, b, c int) int { return a + b + c }})
 		require.NoError(t, err, test.input)
 		testExpectedObject(t, test.expected, vm.Registers[3])
 	}
