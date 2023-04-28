@@ -41,6 +41,42 @@ var vmTests = []vmTest{
 			Constants: []interface{}{10, 20},
 		}, 10,
 	},
+	{ // 20 * 10
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpMul), 03, 02, 01,
+				byte(OpExit)},
+			Constants: []interface{}{20, 10},
+		}, 200,
+	},
+	{ // 20 / 10
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpDiv), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{20, 10},
+		}, 2,
+	},
+	{ // 20 % 19
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpMod), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{20, 19},
+		}, 1,
+	},
+	{ // 2 ^ 2
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpExp), 03, 02, 01,
+				byte(OpExit)},
+			Constants: []interface{}{2, 2},
+		}, 4,
+	},
 	{ // 1 - 2 + 3 - 4
 		Program{
 			Instructions: []byte{byte(OpStoreInt), 01, 0,
@@ -77,9 +113,45 @@ var vmTests = []vmTest{
 		Program{
 			Instructions: []byte{byte(OpStoreString), 01, 0,
 				byte(OpStoreString), 02, 1,
-				byte(OpEQ), 03, 01, 02,
+				byte(OpEqual), 03, 01, 02,
 				byte(OpExit)},
 			Constants: []interface{}{"a", "b"},
+		}, false,
+	},
+	{ // 1 < 2
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpLessThan), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{1, 2},
+		}, true,
+	},
+	{ // 1 > 2
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpGreaterThan), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{1, 2},
+		}, false,
+	},
+	{ // "a" <= "ab"
+		Program{
+			Instructions: []byte{byte(OpStoreString), 01, 0,
+				byte(OpStoreString), 02, 1,
+				byte(OpLessOrEqual), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{"a", "ab"},
+		}, true,
+	},
+	{ // "a" >= "ab"
+		Program{
+			Instructions: []byte{byte(OpStoreString), 01, 0,
+				byte(OpStoreString), 02, 1,
+				byte(OpGreaterOrEqual), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{"a", "ab"},
 		}, false,
 	},
 	{ // "a" + "b"
@@ -106,7 +178,7 @@ var vmTests = []vmTest{
 				byte(OpStoreInt), 01, 0,
 				byte(OpStoreInt), 02, 1,
 				byte(OpStoreInt), 03, 2,
-				byte(OpCall), 03, 4, 3, 01, 02, 03,
+				byte(OpCall), 03, 3, 3, 01, 02, 03,
 				byte(OpExit)},
 			Constants: []interface{}{1, 2, 3, "bar"}}, 6,
 	},

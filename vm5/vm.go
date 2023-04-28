@@ -2,6 +2,7 @@ package vm5
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 )
 
@@ -16,36 +17,6 @@ func New(program Program) *VM {
 	return &VM{
 		instructions: program.Instructions,
 		constants:    program.Constants,
-	}
-}
-
-func (vm *VM) read2Val() int {
-	l := int(vm.instructions[vm.ip])
-	vm.ip++
-	h := int(vm.instructions[vm.ip])
-	vm.ip++
-
-	val := l + h*256
-	return val
-}
-
-func (vm *VM) readString() (string, error) {
-	len := int(vm.instructions[vm.ip])
-	vm.ip++
-	if len >= 0xffff {
-		return "", fmt.Errorf("string too large")
-	}
-	addr := vm.ip
-	if len <= 32 {
-		var buf [32]byte
-		copy(buf[:], vm.instructions[addr:(addr+len)&0xFFFF])
-		vm.ip += len
-		return string(buf[:len]), nil
-	} else {
-		bytes := make([]byte, len)
-		copy(bytes, vm.instructions[addr:(addr+len)&0xFFFF])
-		vm.ip += len
-		return string(bytes), nil
 	}
 }
 
@@ -64,7 +35,7 @@ func (vm *VM) Run(env interface{}) error {
 				return fmt.Errorf("register %d out of range", reg)
 			}
 			vm.ip++
-			val := vm.constants[vm.instructions[vm.ip]] //vm.read2Val()
+			val := vm.constants[vm.instructions[vm.ip]]
 			vm.ip++
 			vm.Registers[reg] = val
 		case OpAdd:
@@ -108,6 +79,90 @@ func (vm *VM) Run(env interface{}) error {
 			aVal := vm.Registers[a].(int)
 			bVal := vm.Registers[b].(int)
 			vm.Registers[res] = aVal - bVal
+		case OpMul:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			a := vm.instructions[vm.ip]
+			vm.ip++
+			b := vm.instructions[vm.ip]
+			vm.ip++
+
+			if int(a) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", a)
+			}
+			if int(b) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", b)
+			}
+			if int(res) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", res)
+			}
+			aVal := vm.Registers[a].(int)
+			bVal := vm.Registers[b].(int)
+			vm.Registers[res] = aVal * bVal
+		case OpDiv:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			a := vm.instructions[vm.ip]
+			vm.ip++
+			b := vm.instructions[vm.ip]
+			vm.ip++
+
+			if int(a) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", a)
+			}
+			if int(b) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", b)
+			}
+			if int(res) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", res)
+			}
+			aVal := vm.Registers[a].(int)
+			bVal := vm.Registers[b].(int)
+			vm.Registers[res] = aVal / bVal
+		case OpMod:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			a := vm.instructions[vm.ip]
+			vm.ip++
+			b := vm.instructions[vm.ip]
+			vm.ip++
+
+			if int(a) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", a)
+			}
+			if int(b) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", b)
+			}
+			if int(res) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", res)
+			}
+			aVal := vm.Registers[a].(int)
+			bVal := vm.Registers[b].(int)
+			vm.Registers[res] = aVal % bVal
+		case OpExp:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			a := vm.instructions[vm.ip]
+			vm.ip++
+			b := vm.instructions[vm.ip]
+			vm.ip++
+
+			if int(a) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", a)
+			}
+			if int(b) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", b)
+			}
+			if int(res) >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", res)
+			}
+			aVal := vm.Registers[a].(int)
+			bVal := vm.Registers[b].(int)
+			vm.Registers[res] = int(math.Pow(float64(aVal), float64(bVal)))
 		case OpStoreString:
 			vm.ip++
 			reg := vm.instructions[vm.ip]
@@ -148,7 +203,7 @@ func (vm *VM) Run(env interface{}) error {
 			val := int(vm.instructions[vm.ip])
 			vm.ip++
 			vm.Registers[reg] = val != 0
-		case OpEQ:
+		case OpEqual:
 			vm.ip++
 			res := vm.instructions[vm.ip]
 			vm.ip++
@@ -177,6 +232,140 @@ func (vm *VM) Run(env interface{}) error {
 				aVal := vm.Registers[r1]
 				bVal := vm.Registers[r2]
 				vm.Registers[res] = aVal == bVal
+			}
+		case OpNotEqual:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			r1 := int(vm.instructions[vm.ip])
+			vm.ip++
+			r2 := int(vm.instructions[vm.ip])
+			vm.ip++
+
+			if r1 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r1)
+			}
+			if r2 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r2)
+			}
+
+			switch vm.Registers[r1].(type) {
+			case int:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal != bVal
+			case string:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal != bVal
+			case bool:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal != bVal
+			}
+		case OpLessThan:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			r1 := int(vm.instructions[vm.ip])
+			vm.ip++
+			r2 := int(vm.instructions[vm.ip])
+			vm.ip++
+
+			if r1 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r1)
+			}
+			if r2 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r2)
+			}
+
+			switch vm.Registers[r1].(type) {
+			case int:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal.(int) < bVal.(int)
+			case string:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal.(string) < bVal.(string)
+			}
+		case OpGreaterThan:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			r1 := int(vm.instructions[vm.ip])
+			vm.ip++
+			r2 := int(vm.instructions[vm.ip])
+			vm.ip++
+
+			if r1 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r1)
+			}
+			if r2 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r2)
+			}
+
+			switch vm.Registers[r1].(type) {
+			case int:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal.(int) > bVal.(int)
+			case string:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal.(string) > bVal.(string)
+			}
+		case OpLessOrEqual:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			r1 := int(vm.instructions[vm.ip])
+			vm.ip++
+			r2 := int(vm.instructions[vm.ip])
+			vm.ip++
+
+			if r1 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r1)
+			}
+			if r2 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r2)
+			}
+
+			switch vm.Registers[r1].(type) {
+			case int:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal.(int) <= bVal.(int)
+			case string:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal.(string) <= bVal.(string)
+			}
+		case OpGreaterOrEqual:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			r1 := int(vm.instructions[vm.ip])
+			vm.ip++
+			r2 := int(vm.instructions[vm.ip])
+			vm.ip++
+
+			if r1 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r1)
+			}
+			if r2 >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", r2)
+			}
+
+			switch vm.Registers[r1].(type) {
+			case int:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal.(int) >= bVal.(int)
+			case string:
+				aVal := vm.Registers[r1]
+				bVal := vm.Registers[r2]
+				vm.Registers[res] = aVal.(string) >= bVal.(string)
 			}
 		case OpCall:
 			vm.ip++
