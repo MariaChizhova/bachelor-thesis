@@ -19,6 +19,8 @@ var (
 	OpLessOrEqual    = 0x15
 	OpGreaterOrEqual = 0x16
 	OpCall           = 0x17
+	OpJumpIfTrue     = 0x18
+	OpJumpIfFalse    = 0x19
 )
 
 type Opcode struct {
@@ -69,6 +71,10 @@ func (o *Opcode) String() string {
 		return "OpGreaterOrEqual"
 	case OpCall:
 		return "OpCall"
+	case OpJumpIfFalse:
+		return "JumpIfFalse"
+	case OpJumpIfTrue:
+		return "JumpIfTrue"
 	}
 	return "unknown opcode .."
 }

@@ -399,6 +399,33 @@ func (vm *VM) Run(env interface{}) error {
 			}
 			out := reflect.ValueOf(fn).Call(in)
 			vm.Registers[res] = out[0].Interface()
+		case OpJumpIfFalse:
+			vm.ip++
+			reg := int(vm.instructions[vm.ip])
+
+			if vm.Registers[reg] == false {
+				vm.ip++
+				targetIP := int(vm.instructions[vm.ip])
+				if targetIP >= len(vm.instructions) {
+					return fmt.Errorf("jump target out of range")
+				}
+				vm.ip = targetIP
+			} else {
+				vm.ip += 2
+			}
+		case OpJumpIfTrue:
+			vm.ip++
+			reg := int(vm.instructions[vm.ip])
+			if vm.Registers[reg] == true {
+				vm.ip++
+				targetIP := int(vm.instructions[vm.ip])
+				if targetIP >= len(vm.instructions) {
+					return fmt.Errorf("jump target out of range")
+				}
+				vm.ip = targetIP
+			} else {
+				vm.ip += 2
+			}
 		}
 	}
 	return nil

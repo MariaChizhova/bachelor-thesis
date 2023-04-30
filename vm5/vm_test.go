@@ -182,6 +182,116 @@ var vmTests = []vmTest{
 				byte(OpExit)},
 			Constants: []interface{}{1, 2, 3, "bar"}}, 6,
 	},
+	{ // true or false
+		Program{
+			Instructions: []byte{
+				byte(OpStoreBool), 01, 1,
+				byte(OpStoreBool), 03, 1,
+				byte(OpJumpIfTrue), 01, 12,
+				byte(OpStoreBool), 03, 0,
+				byte(OpExit)}}, true,
+	},
+	{ // false or false
+		Program{
+			Instructions: []byte{
+				byte(OpStoreBool), 01, 0,
+				byte(OpStoreBool), 03, 1,
+				byte(OpJumpIfTrue), 01, 12,
+				byte(OpStoreBool), 03, 0,
+				byte(OpExit)}}, false,
+	},
+	{ // false and true
+		Program{
+			Instructions: []byte{
+				byte(OpStoreBool), 01, 0,
+				byte(OpStoreBool), 03, 0,
+				byte(OpJumpIfFalse), 01, 12,
+				byte(OpStoreBool), 03, 1,
+				byte(OpExit)}}, false,
+	},
+	{ // true and true
+		Program{
+			Instructions: []byte{
+				byte(OpStoreBool), 01, 1,
+				byte(OpStoreBool), 03, 0,
+				byte(OpJumpIfFalse), 01, 12,
+				byte(OpStoreBool), 03, 1,
+				byte(OpExit)}}, true,
+	},
+	{ // true and false or true
+		Program{
+			Instructions: []byte{
+				byte(OpStoreBool), 01, 1,
+				byte(OpStoreBool), 03, 0,
+				byte(OpJumpIfFalse), 01, 10,
+				byte(OpStoreBool), 03, 1,
+				byte(OpJumpIfTrue), 00, 0,
+				byte(OpStoreBool), 03, 0,
+				byte(OpJumpIfFalse), 01, 24,
+				byte(OpStoreBool), 03, 1,
+				byte(OpExit),
+			}}, true,
+	},
+	{ // ("a" == "a") and ("a" == "b")
+		Program{
+			Instructions: []byte{
+				byte(OpStoreString), 01, 0, // ("a" == "a")
+				byte(OpStoreString), 02, 1,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpStoreBool), 03, 0,
+				byte(OpJumpIfFalse), 03, 26,
+				byte(OpStoreString), 01, 2, // ("a" == "b")
+				byte(OpStoreString), 02, 3,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpExit),
+			},
+			Constants: []interface{}{"a", "a", "a", "b"}}, false,
+	},
+	{ // ("a" != "a") and ("a" != "b")
+		Program{
+			Instructions: []byte{
+				byte(OpStoreString), 01, 0, // ("a" != "a")
+				byte(OpStoreString), 02, 1,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpStoreBool), 03, 0,
+				byte(OpJumpIfFalse), 03, 26,
+				byte(OpStoreString), 01, 2, // ("a" != "b")
+				byte(OpStoreString), 02, 3,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpExit),
+			},
+			Constants: []interface{}{"a", "a", "a", "b"}}, false,
+	},
+	{ // ("a" != "a") or ("a" != "b")
+		Program{
+			Instructions: []byte{
+				byte(OpStoreString), 01, 0, // ("a" != "a")
+				byte(OpStoreString), 02, 1,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpStoreBool), 03, 1,
+				byte(OpJumpIfTrue), 03, 26,
+				byte(OpStoreString), 01, 2, // ("a" != "b")
+				byte(OpStoreString), 02, 3,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpExit),
+			},
+			Constants: []interface{}{"a", "a", "a", "b"}}, true,
+	},
+	{ // ("a" == "a") or ("a" != "b")
+		Program{
+			Instructions: []byte{
+				byte(OpStoreString), 01, 0, // ("a" == "a")
+				byte(OpStoreString), 02, 1,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpStoreBool), 03, 1,
+				byte(OpJumpIfTrue), 03, 26,
+				byte(OpStoreString), 01, 2, // ("a" != "b")
+				byte(OpStoreString), 02, 3,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpExit),
+			},
+			Constants: []interface{}{"a", "a", "a", "b"}}, true,
+	},
 }
 
 func TestVM(t *testing.T) {
