@@ -222,13 +222,10 @@ var vmTests = []vmTest{
 		Program{
 			Instructions: []byte{
 				byte(OpStoreBool), 01, 1,
-				byte(OpStoreBool), 03, 0,
-				byte(OpJumpIfFalse), 01, 10,
+				byte(OpJumpIfFalse), 01, 7,
 				byte(OpStoreBool), 03, 1,
-				byte(OpJumpIfTrue), 00, 0,
+				byte(OpJumpIfTrue), 03, 15,
 				byte(OpStoreBool), 03, 0,
-				byte(OpJumpIfFalse), 01, 24,
-				byte(OpStoreBool), 03, 1,
 				byte(OpExit),
 			}}, true,
 	},
@@ -238,8 +235,7 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0, // ("a" == "a")
 				byte(OpStoreString), 02, 1,
 				byte(OpEqual), 03, 01, 02,
-				byte(OpStoreBool), 03, 0,
-				byte(OpJumpIfFalse), 03, 26,
+				byte(OpJumpIfFalse), 03, 23,
 				byte(OpStoreString), 01, 2, // ("a" == "b")
 				byte(OpStoreString), 02, 3,
 				byte(OpEqual), 03, 01, 02,
@@ -253,8 +249,7 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0, // ("a" != "a")
 				byte(OpStoreString), 02, 1,
 				byte(OpEqual), 03, 01, 02,
-				byte(OpStoreBool), 03, 0,
-				byte(OpJumpIfFalse), 03, 26,
+				byte(OpJumpIfFalse), 03, 23,
 				byte(OpStoreString), 01, 2, // ("a" != "b")
 				byte(OpStoreString), 02, 3,
 				byte(OpEqual), 03, 01, 02,
@@ -268,8 +263,7 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0, // ("a" != "a")
 				byte(OpStoreString), 02, 1,
 				byte(OpEqual), 03, 01, 02,
-				byte(OpStoreBool), 03, 1,
-				byte(OpJumpIfTrue), 03, 26,
+				byte(OpJumpIfTrue), 03, 23,
 				byte(OpStoreString), 01, 2, // ("a" != "b")
 				byte(OpStoreString), 02, 3,
 				byte(OpEqual), 03, 01, 02,
@@ -283,14 +277,67 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0, // ("a" == "a")
 				byte(OpStoreString), 02, 1,
 				byte(OpEqual), 03, 01, 02,
-				byte(OpStoreBool), 03, 1,
-				byte(OpJumpIfTrue), 03, 26,
+				byte(OpJumpIfTrue), 03, 23,
 				byte(OpStoreString), 01, 2, // ("a" != "b")
 				byte(OpStoreString), 02, 3,
 				byte(OpEqual), 03, 01, 02,
 				byte(OpExit),
 			},
 			Constants: []interface{}{"a", "a", "a", "b"}}, true,
+	},
+	{ // ("bhhl" > "yp") and ("yvi" < "bwpj") and ("w" > "fa")
+		Program{
+			Instructions: []byte{
+				byte(OpStoreString), 01, 0,
+				byte(OpStoreString), 02, 1,
+				byte(OpGreaterThan), 03, 01, 02,
+				byte(OpJumpIfFalse), 03, 23,
+				byte(OpStoreString), 01, 2,
+				byte(OpStoreString), 02, 3,
+				byte(OpLessThan), 03, 01, 02,
+				byte(OpJumpIfFalse), 03, 36,
+				byte(OpStoreString), 01, 4,
+				byte(OpStoreString), 02, 5,
+				byte(OpGreaterThan), 03, 01, 02,
+				byte(OpExit),
+			},
+			Constants: []interface{}{"bhhl", "yp", "yvi", "bwpj", "w", "fa"}}, false,
+	},
+	{ // ("u" != "fmlpg") or ("wosxx" < "o") or ("m" <= "cwrq")
+		Program{
+			Instructions: []byte{
+				byte(OpStoreString), 01, 0,
+				byte(OpStoreString), 02, 1,
+				byte(OpNotEqual), 03, 01, 02,
+				byte(OpJumpIfTrue), 03, 23,
+				byte(OpStoreString), 01, 2,
+				byte(OpStoreString), 02, 3,
+				byte(OpLessThan), 03, 01, 02,
+				byte(OpJumpIfTrue), 03, 36,
+				byte(OpStoreString), 01, 4,
+				byte(OpStoreString), 02, 5,
+				byte(OpLessOrEqual), 03, 01, 02,
+				byte(OpExit),
+			},
+			Constants: []interface{}{"u", "fmlpg", "wosxx", "o", "m", "cwrq"}}, true,
+	},
+	{ // ("qg" >= "mbqo") or ("ymehe" >= "lh") or ("gnr" == "d")
+		Program{
+			Instructions: []byte{
+				byte(OpStoreString), 01, 0,
+				byte(OpStoreString), 02, 1,
+				byte(OpGreaterOrEqual), 03, 01, 02,
+				byte(OpJumpIfTrue), 03, 23,
+				byte(OpStoreString), 01, 2,
+				byte(OpStoreString), 02, 3,
+				byte(OpGreaterOrEqual), 03, 01, 02,
+				byte(OpJumpIfTrue), 03, 36,
+				byte(OpStoreString), 01, 4,
+				byte(OpStoreString), 02, 5,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpExit),
+			},
+			Constants: []interface{}{"qg", "mbqo", "ymehe", "lh", "gnr", "d"}}, true,
 	},
 }
 

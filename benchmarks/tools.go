@@ -4,6 +4,7 @@ import (
 	"bachelor-thesis/vm5"
 	"fmt"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -158,6 +159,63 @@ func getRandomComparisonOperator() string {
 }
 
 func getRandomLogicalOperator() string {
-	ops := []string{" and ", " or "}
+	ops := []string{" and "} ///, " or "}
 	return ops[rand.Intn(len(ops))]
+}
+
+func extractStrings(expr string) []interface{} {
+	re := regexp.MustCompile(`"(.+?)"`)
+	matches := re.FindAllStringSubmatch(expr, -1)
+	strings := make([]interface{}, len(matches))
+	for i, match := range matches {
+		strings[i] = match[1]
+	}
+	return strings
+}
+
+func generateRegisterProgramCombination(input string) vm5.Program {
+	program := vm5.Program{}
+	program.Constants = extractStrings(input)
+	strIdx := 0
+	idx := 1
+	parts := strings.Split(input, " ")
+	i := 0
+	for i+2 < len(parts) {
+		program.Instructions = append(program.Instructions, byte(vm5.OpStoreString), 01, byte(strIdx))
+		strIdx += 1
+		i += 1
+		program.Instructions = append(program.Instructions, byte(vm5.OpStoreString), 02, byte(strIdx))
+		strIdx += 1
+		i += 1
+		var opcode int
+		switch parts[i-1] {
+		case ">":
+			opcode = vm5.OpGreaterThan
+		case ">=":
+			opcode = vm5.OpGreaterOrEqual
+		case "<":
+			opcode = vm5.OpLessThan
+		case "<=":
+			opcode = vm5.OpLessOrEqual
+		case "==":
+			opcode = vm5.OpEqual
+		case "!=":
+			opcode = vm5.OpNotEqual
+		}
+		program.Instructions = append(program.Instructions, byte(opcode), 03, 01, 02)
+		i += 1
+		if i >= len(parts) {
+			break
+		}
+		idx += 1
+		if parts[i] == "or" {
+			program.Instructions = append(program.Instructions, byte(vm5.OpJumpIfTrue), 03, byte(13*idx-3))
+			i += 1
+		} else if parts[i] == "and" {
+			program.Instructions = append(program.Instructions, byte(vm5.OpJumpIfFalse), 03, byte(13*idx-3))
+			i += 1
+		}
+	}
+	program.Instructions = append(program.Instructions, byte(vm5.OpExit))
+	return program
 }

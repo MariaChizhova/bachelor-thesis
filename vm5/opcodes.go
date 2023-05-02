@@ -1,5 +1,7 @@
 package vm5
 
+import "fmt"
+
 var (
 	OpExit           = 0x00
 	OpStoreInt       = 0x01
@@ -72,13 +74,45 @@ func (o *Opcode) String() string {
 	case OpCall:
 		return "OpCall"
 	case OpJumpIfFalse:
-		return "JumpIfFalse"
+		return "OpJumpIfFalse"
 	case OpJumpIfTrue:
-		return "JumpIfTrue"
+		return "OpJumpIfTrue"
 	}
 	return "unknown opcode .."
 }
 
 func (o *Opcode) Value() byte {
 	return o.instruction
+}
+
+func (p *Program) PrintBytecode() {
+	for i := 0; i < len(p.Instructions); {
+		opcode := NewOpcode(p.Instructions[i])
+		argsCount := opcodeArgsCount(opcode)
+		args := p.Instructions[i+1 : i+1+argsCount]
+
+		fmt.Printf("%s", opcode.String())
+
+		for _, arg := range args {
+			fmt.Printf(" %v", arg)
+		}
+
+		fmt.Println()
+		i += 1 + argsCount
+	}
+}
+
+func opcodeArgsCount(o *Opcode) int {
+	switch int(o.instruction) {
+	case OpExit:
+		return 0
+	case OpAdd, OpSub, OpMul, OpDiv, OpMod, OpExp, OpStringConcat,
+		OpEqual, OpNotEqual, OpLessThan, OpGreaterThan, OpLessOrEqual,
+		OpGreaterOrEqual:
+		return 3
+	case OpStoreInt, OpStoreString, OpStoreBool, OpJumpIfTrue, OpJumpIfFalse:
+		return 2
+	default:
+		return 0
+	}
 }

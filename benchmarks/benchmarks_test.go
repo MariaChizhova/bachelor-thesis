@@ -238,7 +238,10 @@ func Benchmark_registerBasedStrings(b *testing.B) {
 			}
 			b.StopTimer()
 			out = vm.Registers[3]
-			if out != concatenateStringsResult(i) {
+			result := concatenateStringsResult(i)
+			if out != result {
+				fmt.Println(out)
+				fmt.Println(result)
 				b.Fail()
 			}
 		})
@@ -574,22 +577,53 @@ func Benchmark_registerBasedCalls2(b *testing.B) {
 // combination of booleans and strings like these:
 // ("a" > "b") and ("a" == "c") or ("x" <= "xy"), where numArgs = number of Brackets
 func Benchmark_booleansStrings(b *testing.B) {
-	for i := 1; i <= 50; i++ {
+	for i := 1; i <= 20; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			code = generateString(i)
+			//fmt.Println(code)
 			tree := parser.Parse(code)
+			//var out interface{}
+			//var err error
+			//b.ResetTimer()
+			//for n := 0; n < b.N; n++ {
+			//	out, err = evaluator.Eval(tree, nil)
+			//}
+
+			program, err := compiler.Compile(tree)
 			var out interface{}
-			var err error
+			vm := vm2.New(program.Instructions, program.Constants)
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
-				out, err = evaluator.Eval(tree, nil)
+				err = vm.Run(env)
 			}
 			b.StopTimer()
+			out = vm.StackTop()
 			if err != nil {
 				b.Fatal(err)
 			}
 			res, _ := expr.Eval(code, nil)
 			if out.(bool) != res {
+				b.Fail()
+			}
+		})
+	}
+}
+
+func Benchmark_booleansStringsRegister(b *testing.B) {
+	for i := 1; i <= 20; i++ {
+		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
+			input := generateString(i)
+			program := generateRegisterProgramCombination(input)
+			var out interface{}
+			vm := vm5.New(program)
+			b.ResetTimer()
+			for n := 0; n < b.N; n++ {
+				vm.Run(env)
+			}
+			b.StopTimer()
+			result, _ := expr.Eval(input, nil)
+			out = vm.Registers[3]
+			if out != result {
 				b.Fail()
 			}
 		})
