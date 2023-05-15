@@ -136,6 +136,33 @@ var vmTests = []vmTest{
 			Constants: []interface{}{1, 2},
 		}, false,
 	},
+	{ // 1 == 2
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpEqual), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{1, 2},
+		}, false,
+	},
+	{ // 1 != 2
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpNotEqual), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{1, 2},
+		}, true,
+	},
+	{ // true != false
+		Program{
+			Instructions: []byte{byte(OpStoreInt), 01, 0,
+				byte(OpStoreInt), 02, 1,
+				byte(OpNotEqual), 03, 01, 02,
+				byte(OpExit)},
+			Constants: []interface{}{1, 2},
+		}, true,
+	},
 	{ // "a" <= "ab"
 		Program{
 			Instructions: []byte{byte(OpStoreString), 01, 0,

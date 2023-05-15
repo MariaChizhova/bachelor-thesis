@@ -12,8 +12,7 @@ type evaluatorTest struct {
 	expected interface{}
 }
 
-var evaluatorTests = []evaluatorTest{
-	{"true", true},
+var evaluatorTests = []evaluatorTest{{"true", true},
 	{"false", false},
 	{"nil", nil},
 	{"1", int64(1)},
@@ -60,18 +59,24 @@ var evaluatorTests = []evaluatorTest{
 	{"[1, 2, 3][1]", int64(2)},
 	{"[1, 2, 3][1 + 1]", int64(3)},
 	{`["a", 2][0]`, "a"},
+	{`[1, "a", 3 + 5, "c"][1]`, "a"},
 	{"not true", false},
 	{"not false", true},
 	{"true or false", true},
 	{"false or false", false},
 	{"true and false", false},
 	{"false and false", false},
+	{`false or true`, true},
 	{"(5 > 2) and (2 <= 3) == true", true},
 	{"(1 > 2) or (2 >= 3) == false", true},
 	{`"abc" < "bcd"`, true},
 	{`"abc" <= "bcd"`, true},
 	{`"abcd" > "abc"`, true},
 	{`"abc" >= "abcd"`, false},
+	{`("rv" == "t") and ("dntxr" > "c") or ("ssjy" == "l") or ("snso" < "uox") and ("qym" < "qyi") and ("tvzew" < "i") or ("bv" <= "xw")`, true},
+	{`false and false or true`, true},
+	{`("qym" < "qyi") and ("tvzew" < "i") or ("bv" <= "xw")`, true},
+	{`("kt" >= "cwcg") and ("pppvp" > "xqqew") or ("geh" <= "wst") and ("je" != "wvvkr") or ("oejgc" < "obsjo") and ("r" != "ml") or ("bkyay" >= "hqdnn")`, true},
 }
 
 func TestEvaluator(t *testing.T) {
