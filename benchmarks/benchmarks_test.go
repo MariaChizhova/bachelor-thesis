@@ -591,7 +591,7 @@ func Benchmark_booleansStrings(b *testing.B) {
 
 			program, err := compiler.Compile(tree)
 			var out interface{}
-			vm := vm2.New(program.Instructions, program.Constants)
+			vm := vm.New(program.Instructions, program.Constants)
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
 				err = vm.Run(env)

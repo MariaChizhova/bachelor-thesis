@@ -12,7 +12,7 @@ import (
 func main() {
 	// prints extracted array of ns/op from generated log from benchmarks
 	// To generate log, run the following instruction: go test -bench Benchmark_NAME -benchmem &>> NAME.log
-	file, err := os.Open("benchmarks/1.log")
+	file, err := os.Open("benchmarks/rbs.log")
 	if err != nil {
 		fmt.Println(err)
 		return

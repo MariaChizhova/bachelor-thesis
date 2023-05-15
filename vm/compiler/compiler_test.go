@@ -183,7 +183,7 @@ var compilerTests = []compilerTest{
 		Program{
 			Instructions: concatInstructions([]code.Instructions{
 				code.Make(code.OpTrue),
-				code.Make(code.OpJumpIfTrue, 4),
+				code.Make(code.OpJumpIfTrue, 2),
 				code.Make(code.OpPop),
 				code.Make(code.OpFalse)}),
 		},
@@ -193,7 +193,7 @@ var compilerTests = []compilerTest{
 		Program{
 			Instructions: concatInstructions([]code.Instructions{
 				code.Make(code.OpFalse),
-				code.Make(code.OpJumpIfFalse, 4),
+				code.Make(code.OpJumpIfFalse, 2),
 				code.Make(code.OpPop),
 				code.Make(code.OpFalse)}),
 		},
