@@ -12,7 +12,8 @@ func Eval(node ast.Node, env interface{}) (interface{}, error) {
 	case ast.NodeNumber:
 		return EvalNumber(node)
 	case ast.NodeIdentifier:
-		return node.(*ast.IdentifierNode).Value, nil
+		v := reflect.ValueOf(env)
+		return v.MapIndex(reflect.ValueOf(node.(*ast.IdentifierNode).Value)).Interface(), nil
 	case ast.NodeString:
 		return node.(*ast.StringNode).Value, nil
 	case ast.NodeBool:

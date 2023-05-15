@@ -2,6 +2,8 @@ package evaluator
 
 import (
 	"bachelor-thesis/parser"
+	"bachelor-thesis/parser/ast"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -103,12 +105,27 @@ var evaluatorTestsWithEnvironment = []evaluatorTestWithEnvironment{
 		map[string]interface{}{"add": func(a, b int64) int64 { return a + b }},
 		int64(3),
 	},
+	{`a + b`,
+		map[string]interface{}{"a": 1.2, "b": 2.3},
+		3.5,
+	},
+	{`a and b and not c`,
+		map[string]interface{}{"a": false, "b": true, "c": false},
+		false,
+	},
+	{`a + b + add(1, 2)`,
+		map[string]interface{}{"a": 1.2, "b": 2.3, "add": func(a, b int64) int64 { return a + b }},
+		6.5,
+	},
 }
 
 func TestEvaluatorWithEnvironment(t *testing.T) {
 	for _, test := range evaluatorTestsWithEnvironment {
 		tree := parser.Parse(test.input)
 		evaluated, err := Eval(tree, test.env)
+		if err != nil {
+			fmt.Println(ast.Print(tree))
+		}
 		require.NoError(t, err, test.input)
 		assert.Equal(t, test.expected, evaluated)
 	}
