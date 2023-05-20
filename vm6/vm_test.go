@@ -1,4 +1,4 @@
-package vm2
+package vm6
 
 import (
 	"bachelor-thesis/parser"
