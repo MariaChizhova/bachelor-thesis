@@ -1,1 +1,1 @@
-#### Multiple stack-based virtual machine
+#### Multiple (strings + interface) stack-based virtual machine

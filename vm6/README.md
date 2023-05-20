@@ -1,0 +1,1 @@
+#### Multiple (int + strings + interface) stack-based virtual machine

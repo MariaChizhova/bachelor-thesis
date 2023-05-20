@@ -1,1 +1,1 @@
-#### Multiple stack-based virtual machine with separate stack for int
+#### Multiple (int + interface) stack-based virtual machine with separate stack for int

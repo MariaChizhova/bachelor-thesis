@@ -1,7 +1,7 @@
 Provides comparison of different virtual machines for an embedded language in Go:
 * tree traversal (evaluator)
 * single-stack based virtual machine (vm)
-* multiple-stack based virtual machine (vm2, vm4)
+* multiple-stack based virtual machine (vm2, vm4, vm6)
 * reflect-based virtual machine (vm3)
 * register-based virtual machine (vm5)
 
