@@ -402,14 +402,13 @@ func (vm *VM) Run(env interface{}) error {
 		case OpJumpIfFalse:
 			vm.ip++
 			reg := int(vm.instructions[vm.ip])
-
 			if vm.Registers[reg] == false {
 				vm.ip++
 				targetIP := int(vm.instructions[vm.ip])
 				if targetIP >= len(vm.instructions) {
 					return fmt.Errorf("jump target out of range")
 				}
-				vm.ip = targetIP
+				vm.ip += targetIP
 			} else {
 				vm.ip += 2
 			}
@@ -422,7 +421,7 @@ func (vm *VM) Run(env interface{}) error {
 				if targetIP >= len(vm.instructions) {
 					return fmt.Errorf("jump target out of range")
 				}
-				vm.ip = targetIP
+				vm.ip += targetIP
 			} else {
 				vm.ip += 2
 			}

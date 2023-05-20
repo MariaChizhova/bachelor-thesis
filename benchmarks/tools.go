@@ -209,10 +209,10 @@ func generateRegisterProgramCombination(input string) vm5.Program {
 		}
 		idx += 1
 		if parts[i] == "or" {
-			program.Instructions = append(program.Instructions, byte(vm5.OpJumpIfTrue), 03, byte(13*idx-3))
+			program.Instructions = append(program.Instructions, byte(vm5.OpJumpIfTrue), 03, byte(11))
 			i += 1
 		} else if parts[i] == "and" {
-			program.Instructions = append(program.Instructions, byte(vm5.OpJumpIfFalse), 03, byte(13*idx-3))
+			program.Instructions = append(program.Instructions, byte(vm5.OpJumpIfFalse), 03, byte(11))
 			i += 1
 		}
 	}

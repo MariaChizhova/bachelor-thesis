@@ -214,7 +214,7 @@ var vmTests = []vmTest{
 			Instructions: []byte{
 				byte(OpStoreBool), 01, 1,
 				byte(OpStoreBool), 03, 1,
-				byte(OpJumpIfTrue), 01, 12,
+				byte(OpJumpIfTrue), 01, 4,
 				byte(OpStoreBool), 03, 0,
 				byte(OpExit)}}, true,
 	},
@@ -223,7 +223,7 @@ var vmTests = []vmTest{
 			Instructions: []byte{
 				byte(OpStoreBool), 01, 0,
 				byte(OpStoreBool), 03, 1,
-				byte(OpJumpIfTrue), 01, 12,
+				byte(OpJumpIfTrue), 01, 4,
 				byte(OpStoreBool), 03, 0,
 				byte(OpExit)}}, false,
 	},
@@ -232,7 +232,7 @@ var vmTests = []vmTest{
 			Instructions: []byte{
 				byte(OpStoreBool), 01, 0,
 				byte(OpStoreBool), 03, 0,
-				byte(OpJumpIfFalse), 01, 12,
+				byte(OpJumpIfFalse), 01, 4,
 				byte(OpStoreBool), 03, 1,
 				byte(OpExit)}}, false,
 	},
@@ -241,7 +241,7 @@ var vmTests = []vmTest{
 			Instructions: []byte{
 				byte(OpStoreBool), 01, 1,
 				byte(OpStoreBool), 03, 0,
-				byte(OpJumpIfFalse), 01, 12,
+				byte(OpJumpIfFalse), 01, 4,
 				byte(OpStoreBool), 03, 1,
 				byte(OpExit)}}, true,
 	},
@@ -249,9 +249,9 @@ var vmTests = []vmTest{
 		Program{
 			Instructions: []byte{
 				byte(OpStoreBool), 01, 1,
-				byte(OpJumpIfFalse), 01, 7,
+				byte(OpJumpIfFalse), 01, 4,
 				byte(OpStoreBool), 03, 1,
-				byte(OpJumpIfTrue), 03, 15,
+				byte(OpJumpIfTrue), 03, 4,
 				byte(OpStoreBool), 03, 0,
 				byte(OpExit),
 			}}, true,
@@ -262,7 +262,7 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0, // ("a" == "a")
 				byte(OpStoreString), 02, 1,
 				byte(OpEqual), 03, 01, 02,
-				byte(OpJumpIfFalse), 03, 23,
+				byte(OpJumpIfFalse), 03, 11,
 				byte(OpStoreString), 01, 2, // ("a" == "b")
 				byte(OpStoreString), 02, 3,
 				byte(OpEqual), 03, 01, 02,
@@ -276,7 +276,7 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0, // ("a" != "a")
 				byte(OpStoreString), 02, 1,
 				byte(OpEqual), 03, 01, 02,
-				byte(OpJumpIfFalse), 03, 23,
+				byte(OpJumpIfFalse), 03, 11,
 				byte(OpStoreString), 01, 2, // ("a" != "b")
 				byte(OpStoreString), 02, 3,
 				byte(OpEqual), 03, 01, 02,
@@ -290,7 +290,7 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0, // ("a" != "a")
 				byte(OpStoreString), 02, 1,
 				byte(OpEqual), 03, 01, 02,
-				byte(OpJumpIfTrue), 03, 23,
+				byte(OpJumpIfTrue), 03, 11,
 				byte(OpStoreString), 01, 2, // ("a" != "b")
 				byte(OpStoreString), 02, 3,
 				byte(OpEqual), 03, 01, 02,
@@ -304,7 +304,7 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0, // ("a" == "a")
 				byte(OpStoreString), 02, 1,
 				byte(OpEqual), 03, 01, 02,
-				byte(OpJumpIfTrue), 03, 23,
+				byte(OpJumpIfTrue), 03, 11,
 				byte(OpStoreString), 01, 2, // ("a" != "b")
 				byte(OpStoreString), 02, 3,
 				byte(OpEqual), 03, 01, 02,
@@ -318,11 +318,11 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0,
 				byte(OpStoreString), 02, 1,
 				byte(OpGreaterThan), 03, 01, 02,
-				byte(OpJumpIfFalse), 03, 23,
+				byte(OpJumpIfFalse), 03, 11,
 				byte(OpStoreString), 01, 2,
 				byte(OpStoreString), 02, 3,
 				byte(OpLessThan), 03, 01, 02,
-				byte(OpJumpIfFalse), 03, 36,
+				byte(OpJumpIfFalse), 03, 11,
 				byte(OpStoreString), 01, 4,
 				byte(OpStoreString), 02, 5,
 				byte(OpGreaterThan), 03, 01, 02,
@@ -336,11 +336,11 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0,
 				byte(OpStoreString), 02, 1,
 				byte(OpNotEqual), 03, 01, 02,
-				byte(OpJumpIfTrue), 03, 23,
+				byte(OpJumpIfTrue), 03, 11,
 				byte(OpStoreString), 01, 2,
 				byte(OpStoreString), 02, 3,
 				byte(OpLessThan), 03, 01, 02,
-				byte(OpJumpIfTrue), 03, 36,
+				byte(OpJumpIfTrue), 03, 11,
 				byte(OpStoreString), 01, 4,
 				byte(OpStoreString), 02, 5,
 				byte(OpLessOrEqual), 03, 01, 02,
@@ -354,11 +354,11 @@ var vmTests = []vmTest{
 				byte(OpStoreString), 01, 0,
 				byte(OpStoreString), 02, 1,
 				byte(OpGreaterOrEqual), 03, 01, 02,
-				byte(OpJumpIfTrue), 03, 23,
+				byte(OpJumpIfTrue), 03, 11,
 				byte(OpStoreString), 01, 2,
 				byte(OpStoreString), 02, 3,
 				byte(OpGreaterOrEqual), 03, 01, 02,
-				byte(OpJumpIfTrue), 03, 36,
+				byte(OpJumpIfTrue), 03, 11,
 				byte(OpStoreString), 01, 4,
 				byte(OpStoreString), 02, 5,
 				byte(OpEqual), 03, 01, 02,
