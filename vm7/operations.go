@@ -10,8 +10,6 @@ func (vm *VM) executeAddOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
 	case int64:
 		switch y := b.(type) {
-		case int64:
-			return x + y
 		case float64:
 			return float64(x) + y
 		}
@@ -22,11 +20,6 @@ func (vm *VM) executeAddOperation(a, b interface{}) interface{} {
 		case float64:
 			return x + y
 		}
-	case string:
-		switch y := b.(type) {
-		case string:
-			return x + y
-		}
 	}
 	panic(fmt.Sprintf("invalid operation: %T + %T", a, b))
 }
@@ -35,8 +28,6 @@ func (vm *VM) executeSubtractOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
 	case int64:
 		switch y := b.(type) {
-		case int64:
-			return x - y
 		case float64:
 			return float64(x) - y
 		}
@@ -55,8 +46,6 @@ func (vm *VM) executeMultiplyOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
 	case int64:
 		switch y := b.(type) {
-		case int64:
-			return x * y
 		case float64:
 			return float64(x) * y
 		}
@@ -74,8 +63,6 @@ func (vm *VM) executeDivideOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
 	case int64:
 		switch y := b.(type) {
-		case int64:
-			return x / y
 		case float64:
 			return float64(x) / y
 		}
@@ -89,22 +76,11 @@ func (vm *VM) executeDivideOperation(a, b interface{}) interface{} {
 	}
 	panic(fmt.Sprintf("invalid operation: %T / %T", a, b))
 }
-func (vm *VM) executeRemainderOperation(a, b interface{}) interface{} {
-	switch x := a.(type) {
-	case int64:
-		switch y := b.(type) {
-		case int64:
-			return x % y
-		}
-	}
-	panic(fmt.Sprintf("invalid operation: %T mod %T", a, b))
-}
+
 func (vm *VM) executeExponentiationOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
 	case int64:
 		switch y := b.(type) {
-		case int64:
-			return int64(math.Pow(float64(x), float64(y)))
 		case float64:
 			return math.Pow(float64(x), y)
 		}
@@ -137,8 +113,6 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 		switch y := a.(type) {
 		case int64:
 			switch x := b.(type) {
-			case int64:
-				return x < y
 			case float64:
 				return x < float64(y)
 			}
@@ -149,18 +123,11 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 			case float64:
 				return x < y
 			}
-		case string:
-			switch x := b.(type) {
-			case string:
-				return x < y
-			}
 		}
 	case code.OpLessOrEqual:
 		switch y := a.(type) {
 		case int64:
 			switch x := b.(type) {
-			case int64:
-				return x <= y
 			case float64:
 				return x <= float64(y)
 			}
@@ -171,18 +138,11 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 			case float64:
 				return x <= y
 			}
-		case string:
-			switch x := b.(type) {
-			case string:
-				return x <= y
-			}
 		}
 	case code.OpGreaterThan:
 		switch y := a.(type) {
 		case int64:
 			switch x := b.(type) {
-			case int64:
-				return x > y
 			case float64:
 				return x > float64(y)
 			}
@@ -193,18 +153,11 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 			case float64:
 				return x > y
 			}
-		case string:
-			switch x := b.(type) {
-			case string:
-				return x > y
-			}
 		}
 	case code.OpGreaterOrEqual:
 		switch y := a.(type) {
 		case int64:
 			switch x := b.(type) {
-			case int64:
-				return x >= y
 			case float64:
 				return x >= float64(y)
 			}
@@ -213,11 +166,6 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 			case int64:
 				return float64(x) >= y
 			case float64:
-				return x >= y
-			}
-		case string:
-			switch x := b.(type) {
-			case string:
 				return x >= y
 			}
 		}
@@ -230,8 +178,6 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 			}
 		case int64:
 			switch x := b.(type) {
-			case int64:
-				return x == y
 			case float64:
 				return x == float64(y)
 			}
@@ -240,11 +186,6 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 			case int64:
 				return float64(x) == y
 			case float64:
-				return x == y
-			}
-		case string:
-			switch x := b.(type) {
-			case string:
 				return x == y
 			}
 		}
@@ -257,8 +198,6 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 			}
 		case int64:
 			switch x := b.(type) {
-			case int64:
-				return x != y
 			case float64:
 				return x != float64(y)
 			}
@@ -267,11 +206,6 @@ func (vm *VM) executeComparisonOperation(a interface{}, b interface{}, opcode co
 			case int64:
 				return float64(x) != y
 			case float64:
-				return x != y
-			}
-		case string:
-			switch x := b.(type) {
-			case string:
 				return x != y
 			}
 		}

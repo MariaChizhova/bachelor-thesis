@@ -31,13 +31,14 @@ func New(instructions code.Instructions, constants []interface{}) *VM {
 }
 
 func (vm *VM) StackTop() interface{} {
-	if vm.adds[len(vm.adds)-1] == 0 {
+	switch vm.adds[len(vm.adds)-1] {
+	case 0:
 		return vm.stack[len(vm.stack)-1]
-	} else if vm.adds[len(vm.adds)-1] == 1 {
+	case 1:
 		return vm.stackString[len(vm.stackString)-1]
-	} else if vm.adds[len(vm.adds)-1] == 2 {
+	case 2:
 		return vm.stackInt[len(vm.stackInt)-1]
-	} else {
+	default:
 		return nil
 	}
 }
@@ -131,12 +132,8 @@ func (vm *VM) Run(env interface{}) error {
 			b, _, bi := vm.pop()
 			if a == nil && b == nil {
 				vm.push(bi % ai)
-			} else if a != nil && b != nil {
-				vm.push(vm.executeRemainderOperation(b, a))
-			} else if b != nil {
-				vm.push(vm.executeRemainderOperation(b, ai))
 			} else {
-				vm.push(vm.executeRemainderOperation(bi, a))
+				panic(fmt.Sprintf("invalid operation: %T mod %T", a, b))
 			}
 		case code.OpExp:
 			a, _, ai := vm.pop()
@@ -249,22 +246,23 @@ func (vm *VM) push(value interface{}) {
 }
 
 func (vm *VM) pop() (interface{}, string, int64) {
-	if vm.adds[len(vm.adds)-1] == 0 {
+	switch vm.adds[len(vm.adds)-1] {
+	case 0:
 		value := vm.stack[len(vm.stack)-1]
 		vm.stack = vm.stack[:len(vm.stack)-1]
 		vm.adds = vm.adds[:len(vm.adds)-1]
 		return value, "", 0
-	} else if vm.adds[len(vm.adds)-1] == 1 {
+	case 1:
 		valueString := vm.stackString[len(vm.stackString)-1]
 		vm.stackString = vm.stackString[:len(vm.stackString)-1]
 		vm.adds = vm.adds[:len(vm.adds)-1]
 		return nil, valueString, 0
-	} else if vm.adds[len(vm.adds)-1] == 2 {
+	case 2:
 		valueInt := vm.stackInt[len(vm.stackInt)-1]
 		vm.stackInt = vm.stackInt[:len(vm.stackInt)-1]
 		vm.adds = vm.adds[:len(vm.adds)-1]
 		return nil, "", valueInt
-	} else {
+	default:
 		return nil, "", 0
 	}
 }
