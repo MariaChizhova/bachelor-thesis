@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"reflect"
 )
 
 type VM struct {
@@ -223,52 +222,6 @@ func (vm *VM) Run(env interface{}) error {
 			vm.sp += 2
 			if !vm.StackTop().(bool) {
 				vm.sp += pos
-			}
-		case code.OpCall:
-			elem, _, _ := vm.pop()
-			fn := reflect.ValueOf(elem)
-			size := int(binary.BigEndian.Uint16(vm.instructions[vm.sp+1:]))
-			vm.sp += 2
-			in := make([]reflect.Value, size)
-			for i := int(size) - 1; i >= 0; i-- {
-				param, s, _ := vm.pop()
-				if param == nil {
-					param = s
-				}
-				if param == nil && reflect.TypeOf(param) == nil {
-					in[i] = reflect.ValueOf(&param).Elem()
-				} else {
-					in[i] = reflect.ValueOf(param)
-				}
-			}
-			out := fn.Call(in)
-			if len(out) == 2 && out[1].Type() == reflect.TypeOf((*error)(nil)).Elem() && !out[1].IsNil() {
-				panic(out[1].Interface().(error))
-			}
-			vm.push(out[0].Interface())
-		case code.OpLoadConst:
-			constIndex := binary.BigEndian.Uint16(vm.instructions[vm.sp+1:])
-			vm.sp += 2
-			v := reflect.ValueOf(env)
-			kind := v.Kind()
-			if kind == reflect.Invalid {
-				panic(fmt.Sprintf("cannot fetch %v from %T", vm.constants[constIndex], env))
-			}
-
-			if kind == reflect.Ptr {
-				v = reflect.Indirect(v)
-				kind = v.Kind()
-			}
-
-			switch kind {
-			case reflect.Map:
-				value := v.MapIndex(reflect.ValueOf(vm.constants[constIndex]))
-				if value.IsValid() {
-					vm.push(value.Interface())
-				} else {
-					elem := reflect.TypeOf(env).Elem()
-					vm.push(reflect.Zero(elem).Interface())
-				}
 			}
 		default:
 			return fmt.Errorf("unsupported opcode: %d", code.Opcode(vm.instructions[vm.sp]))
