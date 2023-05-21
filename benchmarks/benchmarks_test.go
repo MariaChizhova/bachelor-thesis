@@ -8,6 +8,7 @@ import (
 	"bachelor-thesis/vm2"
 	"bachelor-thesis/vm3"
 	"bachelor-thesis/vm5"
+	"bachelor-thesis/vm7"
 	"fmt"
 	"github.com/antonmedv/expr"
 	"math"
@@ -15,7 +16,7 @@ import (
 )
 
 func Benchmark_treeTraversal(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(getSum(i))
 			var out interface{}
@@ -38,7 +39,7 @@ func Benchmark_treeTraversal(b *testing.B) {
 }
 
 func Benchmark_singleStack(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(getSum(i))
 			program, err := compiler.Compile(tree)
@@ -63,12 +64,12 @@ func Benchmark_singleStack(b *testing.B) {
 }
 
 func Benchmark_multipleStacks(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(getSum(i))
 			program, err := compiler.Compile(tree)
 			var out interface{}
-			vm := vm2.New(program.Instructions, program.Constants)
+			vm := vm7.New(program.Instructions, program.Constants)
 
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
@@ -88,7 +89,7 @@ func Benchmark_multipleStacks(b *testing.B) {
 }
 
 func Benchmark_reflectBased(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(getSum(i))
 			program, err := compiler.Compile(tree)
@@ -113,7 +114,7 @@ func Benchmark_reflectBased(b *testing.B) {
 }
 
 func Benchmark_registerBasedSum(b *testing.B) {
-	for i := 1; i <= 76; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			program := generateSumBytecode(i)
 			vm := vm5.New(program)
@@ -132,7 +133,7 @@ func Benchmark_registerBasedSum(b *testing.B) {
 
 // Strings
 func Benchmark_treeTraversalStrings(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(concatenateStrings(i))
 			var out interface{}
@@ -155,7 +156,7 @@ func Benchmark_treeTraversalStrings(b *testing.B) {
 }
 
 func Benchmark_singleStackStrings(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(concatenateStrings(i))
 			program, err := compiler.Compile(tree)
@@ -179,12 +180,12 @@ func Benchmark_singleStackStrings(b *testing.B) {
 }
 
 func Benchmark_multipleStacksStrings(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(concatenateStrings(i))
 			program, err := compiler.Compile(tree)
 			var out interface{}
-			vm := vm2.New(program.Instructions, program.Constants)
+			vm := vm7.New(program.Instructions, program.Constants)
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
 				err = vm.Run(nil)
@@ -203,7 +204,7 @@ func Benchmark_multipleStacksStrings(b *testing.B) {
 }
 
 func Benchmark_reflectBasedStrings(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(concatenateStrings(i))
 			program, err := compiler.Compile(tree)
@@ -227,7 +228,7 @@ func Benchmark_reflectBasedStrings(b *testing.B) {
 }
 
 func Benchmark_registerBasedStrings(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			program := generateBytecodeStrings(i)
 			var out interface{}
@@ -346,7 +347,6 @@ func Benchmark_registerBasedCalls(b *testing.B) {
 			byte(vm5.OpStoreInt), 9, 8,
 			byte(vm5.OpStoreInt), 10, 9,
 			byte(vm5.OpCall), 03, 10, 10, 01, 02, 03, 04, 05, 06, 07, 8, 9, 10,
-			byte(vm5.OpExit),
 		},
 		Constants: []interface{}{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "add"},
 	}
@@ -365,16 +365,18 @@ func Benchmark_registerBasedCalls(b *testing.B) {
 
 // expression
 func Benchmark_stackBasedExpression(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			tree := parser.Parse(getExpression(i))
 			program, err := compiler.Compile(tree)
 			var out interface{}
-			vm := vm3.New(program.Instructions, program.Constants)
+			//var err error
+			vm := vm7.New(program.Instructions, program.Constants)
 
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
 				err = vm.Run(nil)
+				//out, err = evaluator.Eval(tree, nil)
 			}
 			b.StopTimer()
 			out = vm.StackTop()
@@ -395,7 +397,7 @@ func Benchmark_stackBasedExpression(b *testing.B) {
 }
 
 func Benchmark_registerBasedExpression(b *testing.B) {
-	for i := 1; i <= 100; i++ {
+	for i := 200; i <= 200; i++ {
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
 			program := generateExpressionBytecode(i)
 			vm := vm5.New(program)
@@ -557,8 +559,7 @@ func Benchmark_registerBasedCalls2(b *testing.B) {
 			byte(vm5.OpStoreInt), 02, 28,
 			byte(vm5.OpCall), 04, 29, 2, 01, 02,
 			byte(vm5.OpAdd), 03, 03, 04,
-
-			byte(vm5.OpExit)},
+		},
 		Constants: []interface{}{1, 2, "foo1", 1, 2, "foo2", 1, 2, "foo3", 4, 2, "foo4", 5, 2, "foo5", 2, 2, "foo6",
 			1, 2, "foo7", 1, 2, "foo8", 1, 2, "foo9", 1, 2, "foo10"}}
 	vm := vm5.New(program)
@@ -576,11 +577,12 @@ func Benchmark_registerBasedCalls2(b *testing.B) {
 
 // combination of booleans and strings like these:
 // ("a" > "b") and ("a" == "c") or ("x" <= "xy"), where numArgs = number of Brackets
-func Benchmark_booleansStrings(b *testing.B) {
-	for i := 1; i <= 20; i++ {
+func Benchmark_booleansStrings11(b *testing.B) {
+	a := "(\"oe\" == \"e\") and (\"a\" != \"kmad\") and (\"iq\" == \"fpbx\") and (\"z\" != \"tgf\") and (\"a\" >= \"yc\") and (\"bh\" != \"gu\") and (\"zc\" <= \"a\") and (\"i\" >= \"ot\") and (\"utujv\" <= \"ubq\") and (\"pca\" < \"vw\") and (\"bcea\" >= \"uxuq\") and (\"ddf\" <= \"tzp\") and (\"ky\" != \"yegm\") and (\"ywyej\" <= \"bw\") and (\"be\" < \"qban\") and (\"hbgr\" != \"sqe\") and (\"tmc\" > \"ifux\") and (\"didgv\" < \"l\") and (\"tfa\" < \"ij\") and (\"dyvrs\" < \"yijkw\") and (\"sdv\" >= \"jriux\") and (\"jd\" <= \"yxe\") and (\"es\" <= \"xb\") and (\"czrug\" <= \"w\") and (\"khydq\" != \"gar\") and (\"ot\" < \"fl\") and (\"fqmaf\" != \"thr\") and (\"rdg\" != \"e\") and (\"yahb\" != \"khdsk\") and (\"axgi\" == \"bx\") and (\"thln\" > \"hfh\") and (\"jny\" == \"bjomw\") and (\"lc\" == \"tce\") and (\"zok\" >= \"u\") and (\"xmfl\" > \"schcy\") and (\"kt\" > \"zvni\") and (\"svtj\" >= \"q\") and (\"x\" < \"lae\") and (\"zuetf\" > \"tpkc\") and (\"nowy\" == \"gaa\") and (\"zk\" <= \"bbjz\") and (\"zexc\" <= \"v\") and (\"bm\" <= \"jhmjs\") and (\"zl\" < \"cbhp\") and (\"ixrsj\" >= \"cy\") and (\"iet\" != \"b\") and (\"pprq\" == \"tqqls\") and (\"n\" == \"khwdr\") and (\"co\" >= \"apmt\") and (\"pfgoq\" >= \"rvfm\") and (\"qrlv\" == \"zkdr\") and (\"gpoqy\" == \"qbfig\") and (\"i\" <= \"fplix\") and (\"ckcu\" >= \"r\") and (\"mequy\" != \"nu\") and (\"z\" >= \"p\") and (\"qiqge\" < \"jkwcy\") and (\"s\" <= \"iiedc\") and (\"fkcz\" <= \"b\") and (\"bbd\" <= \"bvzg\") and (\"wq\" > \"jdua\") and (\"z\" == \"pqqz\") and (\"pw\" != \"djbp\") and (\"sriu\" != \"dctvv\") and (\"ak\" == \"qmhe\") and (\"nwipo\" < \"jwe\") and (\"dr\" >= \"ec\") and (\"jt\" >= \"gus\") and (\"lo\" != \"maqe\") and (\"ee\" != \"tiyq\") and (\"qqdd\" <= \"osih\") and (\"feraf\" < \"e\") and (\"jh\" >= \"c\") and (\"o\" > \"qh\") and (\"qzrkj\" == \"pyiy\") and (\"fdv\" == \"luu\") and (\"emyp\" >= \"fj\") and (\"goij\" > \"usyz\") and (\"hx\" == \"da\") and (\"zteu\" < \"z\") and (\"iicb\" < \"e\") and (\"zely\" == \"xsal\") and (\"uw\" != \"zymi\") and (\"rrluj\" != \"k\") and (\"o\" >= \"lg\") and (\"tzjut\" == \"p\") and (\"k\" <= \"pb\") and (\"hnng\" >= \"iwu\") and (\"ucpwg\" > \"wzx\") and (\"ttxnj\" < \"fl\") and (\"juu\" >= \"bx\") and (\"yf\" > \"i\") and (\"bnpt\" <= \"rlm\") and (\"ciz\" < \"ggg\") and (\"jlv\" != \"n\") and (\"hpup\" < \"g\") and (\"dxe\" >= \"awdg\") and (\"acbk\" >= \"nzm\") and (\"uki\" >= \"fd\") and (\"ti\" >= \"aryb\") and (\"ga\" > \"r\") and (\"d\" >= \"qawqn\") and (\"xup\" != \"pum\") and (\"h\" != \"azjl\") and (\"kw\" != \"uuxxw\") and (\"syfl\" != \"oisp\") and (\"ath\" < \"s\") and (\"s\" >= \"sgwnw\") and (\"esq\" == \"tfz\") and (\"w\" <= \"cla\") and (\"k\" < \"nja\") and (\"e\" != \"wscvd\") and (\"wln\" < \"it\") and (\"qefl\" < \"cqdbu\") and (\"on\" > \"tabg\") and (\"xpde\" == \"a\") and (\"ol\" != \"ie\") and (\"bcweo\" >= \"detbm\") and (\"zf\" != \"wsj\") and (\"r\" >= \"qtn\") and (\"wjyt\" > \"ev\") and (\"g\" < \"uirg\") and (\"v\" > \"z\") and (\"xfj\" >= \"dpn\") and (\"fyq\" > \"pcbve\") and (\"wh\" >= \"wlh\") and (\"seh\" == \"jflvz\") and (\"t\" >= \"pqjz\") and (\"srcqz\" < \"ysn\") and (\"ytxoa\" <= \"rgqkf\") and (\"llgf\" == \"wum\") and (\"rcggd\" == \"do\") and (\"mtemz\" != \"ib\") and (\"h\" >= \"oym\") and (\"duqq\" == \"dv\") and (\"pd\" < \"irasf\") and (\"yj\" >= \"m\") and (\"fg\" >= \"sohlk\") and (\"dwjlz\" >= \"r\") and (\"hunl\" < \"rwe\") and (\"c\" >= \"pe\") and (\"dqawy\" == \"b\") and (\"llb\" != \"wymue\") and (\"li\" >= \"q\") and (\"dsxeg\" < \"xasgn\") and (\"f\" > \"x\") and (\"mj\" < \"d\") and (\"dju\" >= \"u\") and (\"qem\" == \"d\") and (\"pdpjx\" >= \"fxr\") and (\"lqvmd\" > \"sc\") and (\"mgytq\" > \"aggif\") and (\"tbx\" < \"jedpa\") and (\"ru\" != \"zktci\") and (\"nt\" <= \"i\") and (\"dxjw\" > \"rlq\") and (\"riwe\" > \"yxg\") and (\"vlrj\" != \"jdor\") and (\"ps\" != \"bavfw\") and (\"lal\" == \"jse\") and (\"tdl\" <= \"vlie\") and (\"fo\" >= \"lag\") and (\"t\" < \"ql\") and (\"nq\" >= \"mcll\") and (\"gfv\" != \"jclb\") and (\"ctbb\" > \"u\") and (\"vzk\" >= \"ky\") and (\"wtxy\" >= \"tgsly\") and (\"x\" >= \"j\") and (\"z\" == \"b\") and (\"xav\" <= \"lhmq\") and (\"t\" <= \"yqom\") and (\"wkmzt\" > \"dt\") and (\"eru\" > \"r\") and (\"nb\" >= \"vkxyo\") and (\"avsvz\" == \"z\") and (\"weaj\" > \"iazr\") and (\"cdx\" < \"vqrd\") and (\"svlm\" > \"zcvsd\") and (\"n\" == \"sa\") and (\"vt\" > \"qg\") and (\"av\" > \"o\") and (\"hulcd\" != \"k\") and (\"fasnc\" == \"iw\") and (\"t\" < \"vk\") and (\"l\" == \"neh\") and (\"iplv\" != \"fmo\") and (\"g\" < \"lewi\") and (\"xt\" >= \"o\") and (\"uivwz\" == \"fagls\") and (\"oyad\" == \"gri\") and (\"d\" > \"ec\") and (\"rpztf\" >= \"bqtfb\") and (\"hm\" >= \"yfrni\") and (\"pjz\" >= \"gnnd\") and (\"clw\" <= \"zkpd\") and (\"casr\" >= \"pvw\") and (\"vmcvd\" <= \"rvabv\") and (\"zj\" < \"wyfr\") and (\"ki\" <= \"l\")"
+	for i := 0; i < 1; i++ {
+		code = a
 		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
-			code = generateString(i)
-			//fmt.Println(code)
+			//code = generateString(i)
 			tree := parser.Parse(code)
 			//var out interface{}
 			//var err error
@@ -591,7 +593,7 @@ func Benchmark_booleansStrings(b *testing.B) {
 
 			program, err := compiler.Compile(tree)
 			var out interface{}
-			vm := vm.New(program.Instructions, program.Constants)
+			vm := vm7.New(program.Instructions, program.Constants)
 			b.ResetTimer()
 			for n := 0; n < b.N; n++ {
 				err = vm.Run(env)
@@ -610,22 +612,20 @@ func Benchmark_booleansStrings(b *testing.B) {
 }
 
 func Benchmark_booleansStringsRegister(b *testing.B) {
-	for i := 1; i <= 20; i++ {
-		b.Run(fmt.Sprintf("input-%d", i), func(b *testing.B) {
-			input := generateString(i)
-			program := generateRegisterProgramCombination(input)
-			var out interface{}
-			vm := vm5.New(program)
-			b.ResetTimer()
-			for n := 0; n < b.N; n++ {
-				vm.Run(env)
-			}
-			b.StopTimer()
-			result, _ := expr.Eval(input, nil)
-			out = vm.Registers[3]
-			if out != result {
-				b.Fail()
-			}
-		})
+	a := "(\"oe\" == \"e\") and (\"a\" != \"kmad\") and (\"iq\" == \"fpbx\") and (\"z\" != \"tgf\") and (\"a\" >= \"yc\") and (\"bh\" != \"gu\") and (\"zc\" <= \"a\") and (\"i\" >= \"ot\") and (\"utujv\" <= \"ubq\") and (\"pca\" < \"vw\") and (\"bcea\" >= \"uxuq\") and (\"ddf\" <= \"tzp\") and (\"ky\" != \"yegm\") and (\"ywyej\" <= \"bw\") and (\"be\" < \"qban\") and (\"hbgr\" != \"sqe\") and (\"tmc\" > \"ifux\") and (\"didgv\" < \"l\") and (\"tfa\" < \"ij\") and (\"dyvrs\" < \"yijkw\") and (\"sdv\" >= \"jriux\") and (\"jd\" <= \"yxe\") and (\"es\" <= \"xb\") and (\"czrug\" <= \"w\") and (\"khydq\" != \"gar\") and (\"ot\" < \"fl\") and (\"fqmaf\" != \"thr\") and (\"rdg\" != \"e\") and (\"yahb\" != \"khdsk\") and (\"axgi\" == \"bx\") and (\"thln\" > \"hfh\") and (\"jny\" == \"bjomw\") and (\"lc\" == \"tce\") and (\"zok\" >= \"u\") and (\"xmfl\" > \"schcy\") and (\"kt\" > \"zvni\") and (\"svtj\" >= \"q\") and (\"x\" < \"lae\") and (\"zuetf\" > \"tpkc\") and (\"nowy\" == \"gaa\") and (\"zk\" <= \"bbjz\") and (\"zexc\" <= \"v\") and (\"bm\" <= \"jhmjs\") and (\"zl\" < \"cbhp\") and (\"ixrsj\" >= \"cy\") and (\"iet\" != \"b\") and (\"pprq\" == \"tqqls\") and (\"n\" == \"khwdr\") and (\"co\" >= \"apmt\") and (\"pfgoq\" >= \"rvfm\") and (\"qrlv\" == \"zkdr\") and (\"gpoqy\" == \"qbfig\") and (\"i\" <= \"fplix\") and (\"ckcu\" >= \"r\") and (\"mequy\" != \"nu\") and (\"z\" >= \"p\") and (\"qiqge\" < \"jkwcy\") and (\"s\" <= \"iiedc\") and (\"fkcz\" <= \"b\") and (\"bbd\" <= \"bvzg\") and (\"wq\" > \"jdua\") and (\"z\" == \"pqqz\") and (\"pw\" != \"djbp\") and (\"sriu\" != \"dctvv\") and (\"ak\" == \"qmhe\") and (\"nwipo\" < \"jwe\") and (\"dr\" >= \"ec\") and (\"jt\" >= \"gus\") and (\"lo\" != \"maqe\") and (\"ee\" != \"tiyq\") and (\"qqdd\" <= \"osih\") and (\"feraf\" < \"e\") and (\"jh\" >= \"c\") and (\"o\" > \"qh\") and (\"qzrkj\" == \"pyiy\") and (\"fdv\" == \"luu\") and (\"emyp\" >= \"fj\") and (\"goij\" > \"usyz\") and (\"hx\" == \"da\") and (\"zteu\" < \"z\") and (\"iicb\" < \"e\") and (\"zely\" == \"xsal\") and (\"uw\" != \"zymi\") and (\"rrluj\" != \"k\") and (\"o\" >= \"lg\") and (\"tzjut\" == \"p\") and (\"k\" <= \"pb\") and (\"hnng\" >= \"iwu\") and (\"ucpwg\" > \"wzx\") and (\"ttxnj\" < \"fl\") and (\"juu\" >= \"bx\") and (\"yf\" > \"i\") and (\"bnpt\" <= \"rlm\") and (\"ciz\" < \"ggg\") and (\"jlv\" != \"n\") and (\"hpup\" < \"g\") and (\"dxe\" >= \"awdg\") and (\"acbk\" >= \"nzm\") and (\"uki\" >= \"fd\") and (\"ti\" >= \"aryb\") and (\"ga\" > \"r\") and (\"d\" >= \"qawqn\") and (\"xup\" != \"pum\") and (\"h\" != \"azjl\") and (\"kw\" != \"uuxxw\") and (\"syfl\" != \"oisp\") and (\"ath\" < \"s\") and (\"s\" >= \"sgwnw\") and (\"esq\" == \"tfz\") and (\"w\" <= \"cla\") and (\"k\" < \"nja\") and (\"e\" != \"wscvd\") and (\"wln\" < \"it\") and (\"qefl\" < \"cqdbu\") and (\"on\" > \"tabg\") and (\"xpde\" == \"a\") and (\"ol\" != \"ie\") and (\"bcweo\" >= \"detbm\") and (\"zf\" != \"wsj\") and (\"r\" >= \"qtn\") and (\"wjyt\" > \"ev\") and (\"g\" < \"uirg\") and (\"v\" > \"z\") and (\"xfj\" >= \"dpn\") and (\"fyq\" > \"pcbve\") and (\"wh\" >= \"wlh\") and (\"seh\" == \"jflvz\") and (\"t\" >= \"pqjz\") and (\"srcqz\" < \"ysn\") and (\"ytxoa\" <= \"rgqkf\") and (\"llgf\" == \"wum\") and (\"rcggd\" == \"do\") and (\"mtemz\" != \"ib\") and (\"h\" >= \"oym\") and (\"duqq\" == \"dv\") and (\"pd\" < \"irasf\") and (\"yj\" >= \"m\") and (\"fg\" >= \"sohlk\") and (\"dwjlz\" >= \"r\") and (\"hunl\" < \"rwe\") and (\"c\" >= \"pe\") and (\"dqawy\" == \"b\") and (\"llb\" != \"wymue\") and (\"li\" >= \"q\") and (\"dsxeg\" < \"xasgn\") and (\"f\" > \"x\") and (\"mj\" < \"d\") and (\"dju\" >= \"u\") and (\"qem\" == \"d\") and (\"pdpjx\" >= \"fxr\") and (\"lqvmd\" > \"sc\") and (\"mgytq\" > \"aggif\") and (\"tbx\" < \"jedpa\") and (\"ru\" != \"zktci\") and (\"nt\" <= \"i\") and (\"dxjw\" > \"rlq\") and (\"riwe\" > \"yxg\") and (\"vlrj\" != \"jdor\") and (\"ps\" != \"bavfw\") and (\"lal\" == \"jse\") and (\"tdl\" <= \"vlie\") and (\"fo\" >= \"lag\") and (\"t\" < \"ql\") and (\"nq\" >= \"mcll\") and (\"gfv\" != \"jclb\") and (\"ctbb\" > \"u\") and (\"vzk\" >= \"ky\") and (\"wtxy\" >= \"tgsly\") and (\"x\" >= \"j\") and (\"z\" == \"b\") and (\"xav\" <= \"lhmq\") and (\"t\" <= \"yqom\") and (\"wkmzt\" > \"dt\") and (\"eru\" > \"r\") and (\"nb\" >= \"vkxyo\") and (\"avsvz\" == \"z\") and (\"weaj\" > \"iazr\") and (\"cdx\" < \"vqrd\") and (\"svlm\" > \"zcvsd\") and (\"n\" == \"sa\") and (\"vt\" > \"qg\") and (\"av\" > \"o\") and (\"hulcd\" != \"k\") and (\"fasnc\" == \"iw\") and (\"t\" < \"vk\") and (\"l\" == \"neh\") and (\"iplv\" != \"fmo\") and (\"g\" < \"lewi\") and (\"xt\" >= \"o\") and (\"uivwz\" == \"fagls\") and (\"oyad\" == \"gri\") and (\"d\" > \"ec\") and (\"rpztf\" >= \"bqtfb\") and (\"hm\" >= \"yfrni\") and (\"pjz\" >= \"gnnd\") and (\"clw\" <= \"zkpd\") and (\"casr\" >= \"pvw\") and (\"vmcvd\" <= \"rvabv\") and (\"zj\" < \"wyfr\") and (\"ki\" <= \"l\")"
+	input := a
+	program := generateRegisterProgramCombination(input)
+	var out interface{}
+	var result interface{}
+	vm := vm5.New(program)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		vm.Run(env)
+	}
+	b.StopTimer()
+	result, _ = expr.Eval(input, nil)
+	out = vm.Registers[3]
+	if out != result {
+		b.Fail()
 	}
 }
