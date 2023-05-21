@@ -22,12 +22,9 @@ func New(program Program) *VM {
 
 func (vm *VM) Run(env interface{}) error {
 	vm.ip = 0
-	run := true
-	for run {
+	for vm.ip < len(vm.instructions) {
 		op := NewOpcode(vm.instructions[vm.ip])
 		switch int(op.Value()) {
-		case OpExit:
-			run = false
 		case OpStoreInt:
 			vm.ip++
 			reg := int(vm.instructions[vm.ip])

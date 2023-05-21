@@ -68,7 +68,6 @@ func generateSumBytecode(n int) vm5.Program {
 			program.Instructions = append(program.Instructions, byte(vm5.OpAdd), 03, 01, 03)
 		}
 	}
-	program.Instructions = append(program.Instructions, byte(vm5.OpExit))
 	return program
 }
 
@@ -95,7 +94,6 @@ func generateExpressionBytecode(n int) vm5.Program {
 			}
 		}
 	}
-	program.Instructions = append(program.Instructions, byte(vm5.OpExit))
 	return program
 }
 
@@ -118,7 +116,6 @@ func generateBytecodeStrings(n int) vm5.Program {
 			program.Instructions = append(program.Instructions, byte(vm5.OpStringConcat), 03, 03, 01)
 		}
 	}
-	program.Instructions = append(program.Instructions, byte(vm5.OpExit))
 	return program
 }
 
@@ -216,6 +213,5 @@ func generateRegisterProgramCombination(input string) vm5.Program {
 			i += 1
 		}
 	}
-	program.Instructions = append(program.Instructions, byte(vm5.OpExit))
 	return program
 }
