@@ -8,6 +8,13 @@ import (
 
 func (vm *VM) executeAddOperation(a, b interface{}) interface{} {
 	switch x := a.(type) {
+	case int:
+		switch y := b.(type) {
+		case int:
+			return x + y
+		case float64:
+			return float64(x) + y
+		}
 	case int64:
 		switch y := b.(type) {
 		case int64:

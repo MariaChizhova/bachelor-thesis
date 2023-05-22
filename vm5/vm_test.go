@@ -357,6 +357,29 @@ var vmTests = []vmTest{
 			},
 			Constants: []interface{}{"qg", "mbqo", "ymehe", "lh", "gnr", "d"}}, true,
 	},
+	{ // var: 1
+		Program{
+			Instructions: []byte{
+				byte(OpStoreFloat), 03, 0,
+			},
+			Constants: []interface{}{1.5}}, 1.5,
+	},
+	{ // var: 1
+		Program{
+			Instructions: []byte{
+				byte(OpLoadConst), 03, 0,
+			},
+			Constants: []interface{}{"var"}}, 1,
+	},
+	{ // var: 1 + par: 2
+		Program{
+			Instructions: []byte{
+				byte(OpLoadConst), 01, 0,
+				byte(OpLoadConst), 02, 1,
+				byte(OpAdd), 03, 01, 02,
+			},
+			Constants: []interface{}{"var", "par"}}, 3,
+	},
 }
 
 func TestVM(t *testing.T) {
@@ -364,7 +387,8 @@ func TestVM(t *testing.T) {
 		vm := New(test.input)
 		err := vm.Run(map[string]interface{}{
 			"foo": func(a, b int) int { return a + b },
-			"bar": func(a, b, c int) int { return a + b + c }})
+			"bar": func(a, b, c int) int { return a + b + c },
+			"var": 1, "par": 2})
 		require.NoError(t, err, test.input)
 		testExpectedObject(t, test.expected, vm.Registers[3])
 	}

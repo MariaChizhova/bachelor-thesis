@@ -23,6 +23,8 @@ var (
 	OpCall           = 0x17
 	OpJumpIfTrue     = 0x18
 	OpJumpIfFalse    = 0x19
+	OpLoadConst      = 0x20
+	OpStoreFloat     = 0x21
 )
 
 type Opcode struct {
@@ -77,6 +79,10 @@ func (o *Opcode) String() string {
 		return "OpJumpIfFalse"
 	case OpJumpIfTrue:
 		return "OpJumpIfTrue"
+	case OpLoadConst:
+		return "OpLoadConst"
+	case OpStoreFloat:
+		return "OpStoreFloat"
 	}
 	return "unknown opcode .."
 }

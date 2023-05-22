@@ -109,6 +109,11 @@ func EvalBinary(node ast.Node, env interface{}) (interface{}, error) {
 		}
 	case "+":
 		switch l := left.(type) {
+		case int:
+			switch r := right.(type) {
+			case int:
+				return l + r, nil
+			}
 		case int64:
 			switch r := right.(type) {
 			case int64:

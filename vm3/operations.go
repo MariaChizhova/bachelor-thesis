@@ -9,8 +9,19 @@ import (
 
 func (vm *VM) executeAddOperation(a, b reflect.Value) reflect.Value {
 	switch a.Kind() {
+	case reflect.Int:
+		switch b.Kind() {
+		case reflect.Int:
+			return reflect.ValueOf(a.Int() + b.Int())
+		case reflect.Int64:
+			return reflect.ValueOf(a.Int() + b.Int())
+		case reflect.Float64:
+			return reflect.ValueOf(float64(a.Int()) + b.Float())
+		}
 	case reflect.Int64:
 		switch b.Kind() {
+		case reflect.Int:
+			return reflect.ValueOf(a.Int() + b.Int())
 		case reflect.Int64:
 			return reflect.ValueOf(a.Int() + b.Int())
 		case reflect.Float64:

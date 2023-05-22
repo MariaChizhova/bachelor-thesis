@@ -35,6 +35,16 @@ func (vm *VM) Run(env interface{}) error {
 			val := vm.constants[vm.instructions[vm.ip]]
 			vm.ip++
 			vm.Registers[reg] = val
+		case OpStoreFloat:
+			vm.ip++
+			reg := int(vm.instructions[vm.ip])
+			if reg >= len(vm.Registers) {
+				return fmt.Errorf("register %d out of range", reg)
+			}
+			vm.ip++
+			val := vm.constants[vm.instructions[vm.ip]]
+			vm.ip++
+			vm.Registers[reg] = val
 		case OpAdd:
 			vm.ip++
 			res := vm.instructions[vm.ip]
@@ -52,9 +62,30 @@ func (vm *VM) Run(env interface{}) error {
 			if int(res) >= len(vm.Registers) {
 				return fmt.Errorf("register %d out of range", res)
 			}
-			aVal := vm.Registers[a].(int)
-			bVal := vm.Registers[b].(int)
-			vm.Registers[res] = aVal + bVal
+			switch vm.Registers[a].(type) {
+			case int:
+				switch vm.Registers[b].(type) {
+				case int:
+					aVal := vm.Registers[a].(int)
+					bVal := vm.Registers[b].(int)
+					vm.Registers[res] = aVal + bVal
+				case float64:
+					aVal := float64(vm.Registers[a].(int))
+					bVal := vm.Registers[b].(float64)
+					vm.Registers[res] = aVal + bVal
+				}
+			case float64:
+				switch vm.Registers[b].(type) {
+				case int:
+					aVal := vm.Registers[a].(float64)
+					bVal := float64(vm.Registers[b].(int))
+					vm.Registers[res] = aVal + bVal
+				case float64:
+					aVal := vm.Registers[a].(float64)
+					bVal := vm.Registers[b].(float64)
+					vm.Registers[res] = aVal + bVal
+				}
+			}
 		case OpSub:
 			vm.ip++
 			res := vm.instructions[vm.ip]
@@ -115,9 +146,30 @@ func (vm *VM) Run(env interface{}) error {
 			if int(res) >= len(vm.Registers) {
 				return fmt.Errorf("register %d out of range", res)
 			}
-			aVal := vm.Registers[a].(int)
-			bVal := vm.Registers[b].(int)
-			vm.Registers[res] = aVal / bVal
+			switch vm.Registers[a].(type) {
+			case int:
+				switch vm.Registers[b].(type) {
+				case int:
+					aVal := vm.Registers[a].(int)
+					bVal := vm.Registers[b].(int)
+					vm.Registers[res] = aVal / bVal
+				case float64:
+					aVal := float64(vm.Registers[a].(int))
+					bVal := vm.Registers[b].(float64)
+					vm.Registers[res] = aVal / bVal
+				}
+			case float64:
+				switch vm.Registers[b].(type) {
+				case int:
+					aVal := vm.Registers[a].(float64)
+					bVal := float64(vm.Registers[b].(int))
+					vm.Registers[res] = aVal / bVal
+				case float64:
+					aVal := vm.Registers[a].(float64)
+					bVal := vm.Registers[b].(float64)
+					vm.Registers[res] = aVal / bVal
+				}
+			}
 		case OpMod:
 			vm.ip++
 			res := vm.instructions[vm.ip]
@@ -167,9 +219,8 @@ func (vm *VM) Run(env interface{}) error {
 				return fmt.Errorf("register %d out of range", reg)
 			}
 			vm.ip++
-			str := vm.constants[vm.instructions[vm.ip]]
+			vm.Registers[reg] = vm.constants[vm.instructions[vm.ip]]
 			vm.ip++
-			vm.Registers[reg] = str
 		case OpStringConcat:
 			vm.ip++
 			res := vm.instructions[vm.ip]
@@ -187,9 +238,9 @@ func (vm *VM) Run(env interface{}) error {
 			if int(res) >= len(vm.Registers) {
 				return fmt.Errorf("register %d out of range", res)
 			}
-			aVal := vm.Registers[a].(string)
-			bVal := vm.Registers[b].(string)
-			vm.Registers[res] = aVal + bVal
+			aVal := vm.Registers[a]
+			bVal := vm.Registers[b]
+			vm.Registers[res] = aVal.(string) + bVal.(string)
 		case OpStoreBool:
 			vm.ip++
 			reg := int(vm.instructions[vm.ip])
@@ -224,7 +275,7 @@ func (vm *VM) Run(env interface{}) error {
 			case string:
 				aVal := vm.Registers[r1]
 				bVal := vm.Registers[r2]
-				vm.Registers[res] = aVal == bVal
+				vm.Registers[res] = aVal.(string) == bVal.(string)
 			case bool:
 				aVal := vm.Registers[r1]
 				bVal := vm.Registers[r2]
@@ -254,7 +305,7 @@ func (vm *VM) Run(env interface{}) error {
 			case string:
 				aVal := vm.Registers[r1]
 				bVal := vm.Registers[r2]
-				vm.Registers[res] = aVal != bVal
+				vm.Registers[res] = aVal.(string) != bVal.(string)
 			case bool:
 				aVal := vm.Registers[r1]
 				bVal := vm.Registers[r2]
@@ -305,8 +356,14 @@ func (vm *VM) Run(env interface{}) error {
 			switch vm.Registers[r1].(type) {
 			case int:
 				aVal := vm.Registers[r1]
-				bVal := vm.Registers[r2]
-				vm.Registers[res] = aVal.(int) > bVal.(int)
+				switch vm.Registers[r2].(type) {
+				case int:
+					bVal := vm.Registers[r2]
+					vm.Registers[res] = aVal.(int) > bVal.(int)
+				case float64:
+					bVal := vm.Registers[r2]
+					vm.Registers[res] = float64(aVal.(int)) > bVal.(float64)
+				}
 			case string:
 				aVal := vm.Registers[r1]
 				bVal := vm.Registers[r2]
@@ -356,9 +413,27 @@ func (vm *VM) Run(env interface{}) error {
 
 			switch vm.Registers[r1].(type) {
 			case int:
-				aVal := vm.Registers[r1]
-				bVal := vm.Registers[r2]
-				vm.Registers[res] = aVal.(int) >= bVal.(int)
+				switch vm.Registers[r2].(type) {
+				case int:
+					aVal := vm.Registers[r1]
+					bVal := vm.Registers[r2]
+					vm.Registers[res] = aVal.(int) >= bVal.(int)
+				case float64:
+					aVal := vm.Registers[r1]
+					bVal := vm.Registers[r2]
+					vm.Registers[res] = float64(aVal.(int)) >= bVal.(float64)
+				}
+			case float64:
+				switch vm.Registers[r2].(type) {
+				case int:
+					aVal := vm.Registers[r1]
+					bVal := vm.Registers[r2]
+					vm.Registers[res] = aVal.(float64) >= float64(bVal.(int))
+				case float64:
+					aVal := vm.Registers[r1]
+					bVal := vm.Registers[r2]
+					vm.Registers[res] = aVal.(float64) >= bVal.(float64)
+				}
 			case string:
 				aVal := vm.Registers[r1]
 				bVal := vm.Registers[r2]
@@ -396,10 +471,37 @@ func (vm *VM) Run(env interface{}) error {
 			}
 			out := reflect.ValueOf(fn).Call(in)
 			vm.Registers[res] = out[0].Interface()
+		case OpLoadConst:
+			vm.ip++
+			res := vm.instructions[vm.ip]
+			vm.ip++
+			varAddr := vm.constants[vm.instructions[vm.ip]]
+			vm.ip++
+			v := reflect.ValueOf(env)
+			kind := v.Kind()
+			if kind == reflect.Invalid {
+				fmt.Sprintf("error")
+			}
+
+			if kind == reflect.Ptr {
+				v = reflect.Indirect(v)
+				kind = v.Kind()
+			}
+
+			switch kind {
+			case reflect.Map:
+				value := v.MapIndex(reflect.ValueOf(varAddr))
+				if value.IsValid() {
+					vm.Registers[res] = value.Interface()
+				} else {
+					elem := reflect.TypeOf(env).Elem()
+					vm.Registers[res] = reflect.Zero(elem).Interface()
+				}
+			}
 		case OpJumpIfFalse:
 			vm.ip++
 			reg := int(vm.instructions[vm.ip])
-			if vm.Registers[reg] == false {
+			if vm.Registers[reg].(bool) == false {
 				vm.ip++
 				targetIP := int(vm.instructions[vm.ip])
 				if targetIP >= len(vm.instructions) {
@@ -412,7 +514,7 @@ func (vm *VM) Run(env interface{}) error {
 		case OpJumpIfTrue:
 			vm.ip++
 			reg := int(vm.instructions[vm.ip])
-			if vm.Registers[reg] == true {
+			if vm.Registers[reg].(bool) == true {
 				vm.ip++
 				targetIP := int(vm.instructions[vm.ip])
 				if targetIP >= len(vm.instructions) {
