@@ -3,7 +3,7 @@ Provides comparison of different virtual machines for an embedded language in Go
 * single-stack based virtual machine (vm)
 * reflect-based virtual machine (vm3)
 * register-based virtual machine (vm5)
-* multiple-stack based virtual machine (vm2, vm4, vm6, v7)
+* multiple-stack based virtual machine (v7)
 ### Language definition
 
 #### Values 
